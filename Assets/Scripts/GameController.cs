@@ -8,6 +8,7 @@ public class GameController : MonoBehaviour
     public float startWait;
     public float spawnWait;
     public float waveWait;
+    public int waveCount;
 
     private readonly List<FoodWave> foodwaves = new List<FoodWave>();
 
@@ -19,18 +20,17 @@ public class GameController : MonoBehaviour
 
     private void CreateFoodWaves()
     {
-        FoodWave foodwave1 = new FoodWave(8, -1, 1, -1, 1);
-        foodwaves.Add(foodwave1);
-
-        FoodWave foodwave2 = new FoodWave(16, -2, 2, -2, 2);
-        foodwaves.Add(foodwave2);
-
-        FoodWave foodwave3 = new FoodWave(24, -3, 3, -3, 3);
-        foodwaves.Add(foodwave3);
+        for (int i = 1; i <= waveCount; ++i)
+        {
+            FoodWave foodwave = new FoodWave(i);
+            foodwaves.Add(foodwave);
+        }
     }
 
     IEnumerator SpawnFood()
     {
+        FoodMap foodmap = new FoodMap(waveCount);
+
         yield return new WaitForSeconds(startWait);
         for (int i = 0; i < foodwaves.Count; i++)
         {
@@ -38,14 +38,23 @@ public class GameController : MonoBehaviour
 
             for (int j = 0; j < foodwaves[i].maxFoodItems ; j++)
             {
-                Vector2 position = foodwaves[i].GetRandomPosition();
+                Vector2 position;
 
+                do
+                {
+                    position = foodwaves[i].GetRandomPosition();
+
+                    Debug.Log($"position = ({position.x},{position.y})");
+                } while (foodmap.IsOccupied(position));
+                
                 Debug.Log($"Spawning at {position.x}, {position.y}");
 
                 Instantiate(
                     plantFood, 
                     position, 
                     transform.rotation);
+
+                foodmap.MarkOccupied(position);
 
                 yield return new WaitForSeconds(spawnWait);
             }
@@ -62,18 +71,13 @@ public class FoodWave
     private int minColumn;
     private int maxColumn;
 
-    public FoodWave(
-        int newMaxFoodItems,
-        int newMinRow,
-        int newMaxRow,
-        int newMinColumn,
-        int newMaxColumn)
+    public FoodWave(int wave)
     {
-        maxFoodItems = newMaxFoodItems;
-        minRow = newMinRow;
-        maxRow = newMaxRow;
-        minColumn = newMinColumn;
-        maxColumn = newMaxColumn;
+        maxFoodItems = wave*8;
+        minRow = -wave;
+        maxRow = wave;
+        minColumn = -wave;
+        maxColumn = wave;
     }
 
 
@@ -90,27 +94,61 @@ public class FoodWave
         {
             row = RandomBool() ? minRow : maxRow;
 
-            column = Random.Range(minColumn, maxColumn);
-            Debug.Log($"ColumnA: {column}");
+            column = Random.Range(minColumn, maxColumn + 1);
         }
         else
         {
             column = RandomBool() ? minColumn : maxColumn;
-            Debug.Log($"ColumnB: {column}");
 
-            row = Random.Range(minRow, maxRow);
+            row = Random.Range(minRow, maxRow + 1);
         }
-
-        Debug.Log($"Column: {column}");
 
         return new Vector2(row, column);
     }
 
-    private bool RandomBool()
+    private bool RandomBool() => (Random.Range(0, 2) == 1);
+}
+
+public class FoodMap
+{
+    private bool[,] foodMap;
+
+    private int rowCount;
+    private int columnCount;
+    
+    public FoodMap(int waveCount)
     {
-        int randomValue = Random.Range(0, 2);
-        Debug.Log($"randomValue: {randomValue}");
-        return randomValue == 1;
+        rowCount = waveCount*2 + 1;
+        columnCount = rowCount;
+
+        foodMap = new bool[rowCount, columnCount];
+
+        for (int i = 0; i < rowCount; ++i)
+        {
+            for (int j = 0; j < columnCount; ++j)
+            {
+                foodMap[i, j] = false;
+            }
+        }
     }
 
+    public bool IsOccupied(Vector2 position)
+    {
+        int row = (int)position.x + (rowCount/2);
+        int column = (int)position.y + (columnCount/2);
+
+        return IsOccupied(row, column);
+    }
+
+    public bool IsOccupied(int row, int column) => foodMap[row, column];
+
+    public void MarkOccupied(Vector2 position)
+    {
+        int row = (int)position.x + (rowCount/2);
+        int column = (int)position.y + (columnCount/2);
+
+        MarkOccupied(row, column);
+    }
+
+    public void MarkOccupied(int row, int column) => foodMap[row, column] = true;
 }

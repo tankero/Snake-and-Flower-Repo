@@ -311,6 +311,7 @@ MonoBehaviour:
   startWait: 1
   spawnWait: 1
   waveWait: 1
+  waveCount: 3
 --- !u!4 &185498078
 Transform:
   m_ObjectHideFlags: 0
