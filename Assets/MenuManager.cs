@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 
 public class MenuManager : MonoBehaviour
@@ -10,7 +12,7 @@ public class MenuManager : MonoBehaviour
     public Button ScoreButton;
     public Button QuitButton;
 
-    
+
     // Start is called before the first frame update
     void Start()
     {
@@ -18,11 +20,8 @@ public class MenuManager : MonoBehaviour
         PlayButton.onClick.AddListener(() => Manager.OnPlay());
 
         QuitButton.onClick.AddListener(() => Manager.OnQuit());
+
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
 }
