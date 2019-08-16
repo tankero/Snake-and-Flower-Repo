@@ -9,13 +9,16 @@ public class GameController : MonoBehaviour
     public float spawnWait;
     public float waveWait;
     public int waveCount;
+   [SerializeField] int score = 0;
 
     private readonly List<FoodWave> foodwaves = new List<FoodWave>();
 
     private void Start()
     {
+
         CreateFoodWaves();
         StartCoroutine(SpawnFood());
+        
     }
 
     private void CreateFoodWaves()
@@ -25,6 +28,11 @@ public class GameController : MonoBehaviour
             FoodWave foodwave = new FoodWave(i);
             foodwaves.Add(foodwave);
         }
+    }
+    public void AddToScore(int pointsToAdd)
+    {
+    score += pointsToAdd;
+    Debug.Log(score);
     }
 
     IEnumerator SpawnFood()
@@ -152,3 +160,4 @@ public class FoodMap
 
     public void MarkOccupied(int row, int column) => foodMap[row, column] = true;
 }
+
