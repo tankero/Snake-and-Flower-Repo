@@ -31,8 +31,8 @@ public class GameController : MonoBehaviour
     }
     public void AddToScore(int pointsToAdd)
     {
-    score += pointsToAdd;
-    Debug.Log(score);
+    score += pointsToAdd; //adds total amount to food
+    Debug.Log(score);//TODO implement system that will dropoff total score to the plant object
     }
 
     IEnumerator SpawnFood()
