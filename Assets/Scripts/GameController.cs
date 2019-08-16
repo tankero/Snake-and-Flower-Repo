@@ -1,6 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
+using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class GameController : MonoBehaviour
 {
@@ -9,20 +13,107 @@ public class GameController : MonoBehaviour
     public float spawnWait;
     public float waveWait;
     public int waveCount;
+    public LevelManager Manager;
+    public Button MenuButton;
+    public Transform PlayerTransform;
+    public Tilemap levelGrid;
+    public bool playerIsMoving = false;
+    public Vector3 PlayerDestination;
 
+    public float PlayerSpeed = 1f;
+    public int CellSize = 32;
     private readonly List<FoodWave> foodwaves = new List<FoodWave>();
+
+    public enum Direction
+    {
+        Up,
+        Down,
+        Left,
+        Right
+    }
 
     private void Start()
     {
         CreateFoodWaves();
         StartCoroutine(SpawnFood());
+        Manager = GameObject.Find("Level Manager")?.GetComponent<LevelManager>();
+        MenuButton.onClick.AddListener(() => Manager?.OnMenu());
+        PlayerDestination = PlayerTransform.position;
+    }   
+    
+    // Update is called once per frame
+    void Update()
+    {
+        if (!playerIsMoving)
+        {
+            if (Input.GetKeyDown(KeyCode.W))
+            {
+                MovePlayer(Direction.Up);
+            }
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                MovePlayer(Direction.Down);
+            }
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                MovePlayer(Direction.Left);
+            }
+            if (Input.GetKeyDown(KeyCode.D))
+            {
+                MovePlayer(Direction.Right);
+            }
+        }
+    }
+
+    void FixedUpdate()
+    {
+        if (Vector3.Distance(PlayerTransform.position, PlayerDestination) <= 0.1f)
+        {
+            PlayerTransform.position = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerDestination));
+            playerIsMoving = false;
+
+        }
+        else
+        {
+            PlayerTransform.position = Vector3.Lerp(PlayerTransform.position, PlayerDestination,
+                PlayerSpeed * Time.fixedDeltaTime);
+        }
+    }
+
+    public void MovePlayer(Direction direction)
+    {
+        switch (direction)
+        {
+            case Direction.Up:
+                PlayerDestination = PlayerTransform.position + (Vector3.up * CellSize);
+                break;
+            case Direction.Down:
+                PlayerDestination = PlayerTransform.position + (Vector3.down * CellSize);
+                break;
+            case Direction.Left:
+                PlayerDestination = PlayerTransform.position + (Vector3.left * CellSize);
+                break;
+            case Direction.Right:
+                PlayerDestination = PlayerTransform.position + (Vector3.right * CellSize);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
+        }
+
+        playerIsMoving = true;
+    }
+    public void ResetMovement()
+    {
+        PlayerTransform.position = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerTransform.position));
+        PlayerDestination = PlayerTransform.position;
+        playerIsMoving = false;
     }
 
     private void CreateFoodWaves()
     {
         for (int i = 1; i <= waveCount; ++i)
         {
-            FoodWave foodwave = new FoodWave(i);
+            FoodWave foodwave = new FoodWave(i, levelGrid);
             foodwaves.Add(foodwave);
         }
     }
@@ -70,14 +161,16 @@ public class FoodWave
     private int maxRow;
     private int minColumn;
     private int maxColumn;
+    private Tilemap _map;
 
-    public FoodWave(int wave)
+    public FoodWave(int wave, Tilemap map)
     {
         maxFoodItems = wave*8;
         minRow = -wave;
         maxRow = wave;
         minColumn = -wave;
         maxColumn = wave;
+        _map = map;
     }
 
 
@@ -103,7 +196,7 @@ public class FoodWave
             row = Random.Range(minRow, maxRow + 1);
         }
 
-        return new Vector2(row, column);
+        return _map.GetCellCenterWorld(new Vector3Int(row, column,0));
     }
 
     private bool RandomBool() => (Random.Range(0, 2) == 1);
@@ -116,6 +209,8 @@ public class FoodMap
     private int rowCount;
     private int columnCount;
     
+
+
     public FoodMap(int waveCount)
     {
         rowCount = waveCount*2 + 1;

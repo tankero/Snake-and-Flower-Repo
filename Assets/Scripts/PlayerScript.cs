@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerScript : MonoBehaviour
 {
-    public PlayManager manager;
+    public GameController manager;
     // Start is called before the first frame update
     void Start()
     {
@@ -19,7 +19,12 @@ public class PlayerScript : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        manager.ResetMovement();
-        Debug.Log("Crashed with something called: " + collision.gameObject);
+        
+        if (collision.gameObject.name.Contains("Exit"))
+        {
+            manager.ResetMovement();
+        }
+
+
     }
 }
