@@ -23,6 +23,8 @@ public class GameController : MonoBehaviour
     public float PlayerSpeed = 1f;
     public int CellSize = 32;
     private readonly List<FoodWave> foodwaves = new List<FoodWave>();
+    [SerializeField]
+    private int score;
 
     public enum Direction
     {
@@ -151,6 +153,12 @@ public class GameController : MonoBehaviour
             }
             yield return new WaitForSeconds(waveWait);
         }
+    }
+
+    public void AddToScore(int pointsToAdd)
+    {
+        score += pointsToAdd;
+        Debug.Log(score);
     }
 }
 
