@@ -24,7 +24,7 @@ public class GameController : MonoBehaviour
     public int CellSize = 32;
     private readonly List<FoodWave> foodwaves = new List<FoodWave>();
     [SerializeField]
-    private int score;
+    public static int snakeScore;
 
     public enum Direction
     {
@@ -162,8 +162,8 @@ public class GameController : MonoBehaviour
 
     public void AddToScore(int pointsToAdd)
     {
-        score += pointsToAdd;
-        Debug.Log(score);
+        snakeScore += pointsToAdd;
+        Debug.Log(snakeScore);
     }
 }
 

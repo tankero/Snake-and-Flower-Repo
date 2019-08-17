@@ -16,7 +16,7 @@ public class FoodPickup : MonoBehaviour
         {
             addedToScore = true;
             FindObjectOfType<GameController>().AddToScore(pointsForfoodPickup);
-            //AudioSource.PlayClipAtPoint(coinPickupSFX, Camera.main.transform.position);//future implementation of an audio effect
+            //AudioSource.PlayClipAtPoint(foodPickupSFX, Camera.main.transform.position);//future implementation of an audio effect
             Destroy(gameObject);
         }
     }
