@@ -3103,9 +3103,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   plantFood: {fileID: 7012926166109139369, guid: 9e7ae1135e38c9f498d503722d81b709,
     type: 3}
-  startWait: 0
-  spawnWait: 10
-  waveWait: 10
+  startWait: 10
+  spawnWait: 1
+  waveWait: 5
   waveCount: 3
   Manager: {fileID: 0}
   MenuButton: {fileID: 279486769}
@@ -3115,3 +3115,4 @@ MonoBehaviour:
   PlayerDestination: {x: 0, y: 0, z: 0}
   PlayerSpeed: 5
   CellSize: 1
+  score: 0

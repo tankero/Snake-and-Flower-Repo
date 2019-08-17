@@ -115,7 +115,7 @@ public class GameController : MonoBehaviour
     {
         for (int i = 1; i <= waveCount; ++i)
         {
-            FoodWave foodwave = new FoodWave(i, levelGrid);
+            FoodWave foodwave = new FoodWave(i);
             foodwaves.Add(foodwave);
         }
     }
@@ -131,7 +131,7 @@ public class GameController : MonoBehaviour
 
             for (int j = 0; j < foodwaves[i].maxFoodItems ; j++)
             {
-                Vector2 position;
+                Vector2Int position;
 
                 do
                 {
@@ -142,12 +142,17 @@ public class GameController : MonoBehaviour
                 
                 Debug.Log($"Spawning at {position.x}, {position.y}");
 
-                Instantiate(
-                    plantFood, 
-                    position, 
-                    transform.rotation);
+                // This code should be moved into a method in FoodMap
+                {
+                    Vector3Int newPosition = new Vector3Int(position.x, position.y, 0);
 
-                foodmap.MarkOccupied(position);
+                    Instantiate(
+                        plantFood,
+                        levelGrid.GetCellCenterWorld(newPosition),
+                        transform.rotation);
+
+                    foodmap.MarkOccupied(position);
+                }
 
                 yield return new WaitForSeconds(spawnWait);
             }
@@ -169,20 +174,18 @@ public class FoodWave
     private int maxRow;
     private int minColumn;
     private int maxColumn;
-    private Tilemap _map;
 
-    public FoodWave(int wave, Tilemap map)
+    public FoodWave(int wave)
     {
         maxFoodItems = wave*8;
         minRow = -wave;
         maxRow = wave;
         minColumn = -wave;
         maxColumn = wave;
-        _map = map;
     }
 
 
-    public Vector2 GetRandomPosition()
+    public Vector2Int GetRandomPosition()
     {
         int row;
         int column;
@@ -204,7 +207,7 @@ public class FoodWave
             row = Random.Range(minRow, maxRow + 1);
         }
 
-        return _map.GetCellCenterWorld(new Vector3Int(row, column,0));
+        return new Vector2Int(row, column);
     }
 
     private bool RandomBool() => (Random.Range(0, 2) == 1);
@@ -217,8 +220,6 @@ public class FoodMap
     private int rowCount;
     private int columnCount;
     
-
-
     public FoodMap(int waveCount)
     {
         rowCount = waveCount*2 + 1;
@@ -237,6 +238,7 @@ public class FoodMap
 
     public bool IsOccupied(Vector2 position)
     {
+
         int row = (int)position.x + (rowCount/2);
         int column = (int)position.y + (columnCount/2);
 
