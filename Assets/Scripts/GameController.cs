@@ -197,7 +197,7 @@ public class FoodWave
         {
             for (int column = minColumn; column <= maxColumn; ++column)
             {
-                if (!foodMap.IsOccupied(new Vector2Int(row, column)))
+                if (!foodMap.IsOccupied(new Vector2Int(column, row)))
                 {
                     return true;
                 }
@@ -208,7 +208,7 @@ public class FoodWave
         {
             for (int row = minRow + 1; row < maxRow; ++row)
             {
-                if (!foodMap.IsOccupied(new Vector2Int(row, column)))
+                if (!foodMap.IsOccupied(new Vector2Int(column, row)))
                 {
                     return true;
                 }
@@ -218,7 +218,7 @@ public class FoodWave
         return false;
     }
 
-    public bool IsPositionValid(int row, int column)
+    public bool IsPositionValid(int column, int row)
     {
         if (((row == minRow) || (row == maxRow)) && (column >= minColumn) && (column <= maxColumn))
             return true;
@@ -230,8 +230,8 @@ public class FoodWave
 
     public Vector2Int GetRandomPosition()
     {
-        int row;
         int column;
+        int row;
 
         // For each position within a wave,
         // either the row or the column must fixed to the min or max value.
@@ -250,7 +250,7 @@ public class FoodWave
             row = Random.Range(minRow, maxRow + 1);
         }
 
-        return new Vector2Int(row, column);
+        return new Vector2Int(column, row);
     }
 
     private bool RandomBool() => (Random.Range(0, 2) == 1);
@@ -265,8 +265,8 @@ public class FoodMap
     private readonly bool[,] foodMap;
     private readonly List<FoodWave> foodwaves = new List<FoodWave>();
 
-    private readonly int rowCount;
     private readonly int columnCount;
+    private readonly int rowCount;
 
     public FoodMap(int waveCount)
     {
@@ -276,16 +276,16 @@ public class FoodMap
 
         CreateFoodWaves();
 
-        rowCount = waveCount * 2 + 1;
-        columnCount = rowCount;
+        columnCount = waveCount * 2 + 1; ;
+        rowCount = columnCount;
 
-        foodMap = new bool[rowCount, columnCount];
+        foodMap = new bool[columnCount, rowCount];
 
-        for (int i = 0; i < rowCount; ++i)
+        for (int column = 0; column < columnCount; ++column)
         {
-            for (int j = 0; j < columnCount; ++j)
+            for (int row = 0; row < rowCount; ++row)
             {
-                foodMap[i, j] = false;
+                foodMap[column, row] = false;
             }
         }
     }
@@ -310,24 +310,23 @@ public class FoodMap
 
     public bool IsOccupied(Vector2Int position)
     {
+        int column = position.x + (columnCount / 2);
+        int row = position.y + (rowCount / 2);
 
-        int row = position.x + (rowCount / 2);
-        int column = position.y + (columnCount / 2);
-
-        return IsOccupied(row, column);
+        return IsOccupied(column, row);
     }
 
-    public bool IsOccupied(int row, int column) => foodMap[row, column];
+    public bool IsOccupied(int column, int row) => foodMap[column, row];
 
     public void MarkOccupied(Vector2 position)
     {
-        int row = (int)position.x + (rowCount / 2);
-        int column = (int)position.y + (columnCount / 2);
+        int column = (int)position.x + (columnCount / 2);
+        int row    = (int)position.y + (rowCount / 2);
 
-        MarkOccupied(row, column);
+        MarkOccupied(column, row);
     }
 
-    public void MarkOccupied(int row, int column) => foodMap[row, column] = true;
+    public void MarkOccupied(int column, int row) => foodMap[column, row] = true;
 
     public int GetFoodWaveMaxItems(int wave) => foodwaves[wave].maxFoodItems;
 
