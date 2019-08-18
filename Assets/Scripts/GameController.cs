@@ -162,7 +162,7 @@ public class GameController : MonoBehaviour
 
     public void ConsumeItem(Vector2 position)
     {
-        foodMap.MarkUnoccupied(position)
+        foodMap.MarkUnoccupied(position);
     }
 
     private void InstantiateGameObjectAtPosition(GameObject gameObject, Vector2Int position)
