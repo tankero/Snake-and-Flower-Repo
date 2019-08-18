@@ -160,6 +160,11 @@ public class GameController : MonoBehaviour
         Debug.Log(snakeScore);
     }
 
+    public void ConsumeItem(Vector2 position)
+    {
+        foodMap.MarkUnoccupied(position)
+    }
+
     private void InstantiateGameObjectAtPosition(GameObject gameObject, Vector2Int position)
     {
         Vector3Int newPosition = new Vector3Int(position.x, position.y, 0);
@@ -327,6 +332,16 @@ public class FoodMap
     }
 
     public void MarkOccupied(int column, int row) => foodMap[column, row] = true;
+
+    public void MarkUnoccupied(Vector2 position)
+    {
+        int column = (int)position.x + (columnCount / 2);
+        int row = (int)position.y + (rowCount / 2);
+
+        MarkUnoccupied(column, row);
+    }
+
+    public void MarkUnoccupied(int column, int row) => foodMap[column, row] = false;
 
     public int GetFoodWaveMaxItems(int wave) => foodwaves[wave].maxFoodItems;
 
