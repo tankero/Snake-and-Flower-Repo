@@ -3103,10 +3103,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   plantFood: {fileID: 7012926166109139369, guid: 9e7ae1135e38c9f498d503722d81b709,
     type: 3}
-  startWait: 10
-  spawnWait: 1
-  waveWait: 5
+  foodSpawnStartWait: 7
+  foodSpawnWait: 3
   waveCount: 3
+  waveDurationInSeconds: 30
   Manager: {fileID: 0}
   MenuButton: {fileID: 279486769}
   PlayerTransform: {fileID: 1099090135}

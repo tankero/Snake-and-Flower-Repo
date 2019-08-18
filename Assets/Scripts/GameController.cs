@@ -9,10 +9,10 @@ using Random = UnityEngine.Random;
 public class GameController : MonoBehaviour
 {
     public GameObject plantFood;
-    public float startWait;
-    public float spawnWait;
-    public float waveWait;
+    public float foodSpawnStartWait;
+    public float foodSpawnWait;
     public int waveCount;
+    public int waveDurationInSeconds;
     public LevelManager Manager;
     public Button MenuButton;
     public Transform PlayerTransform;
@@ -22,6 +22,10 @@ public class GameController : MonoBehaviour
 
     public float PlayerSpeed = 1f;
     public int CellSize = 32;
+
+    private FoodMap foodMap;
+    private int currentWave;
+    private bool gameOver = false;
 
     [SerializeField]
     public static int snakeScore;
@@ -36,12 +40,16 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
-        StartCoroutine(SpawnFood());
         Manager = GameObject.Find("Level Manager")?.GetComponent<LevelManager>();
         MenuButton.onClick.AddListener(() => Manager?.OnMenu());
         PlayerDestination = PlayerTransform.position;
-    }   
-    
+
+        foodMap = new FoodMap(waveCount);
+
+        StartCoroutine(FoodWaveController());
+        StartCoroutine(SpawnFood());
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -110,30 +118,39 @@ public class GameController : MonoBehaviour
         playerIsMoving = false;
     }
 
+    IEnumerator FoodWaveController()
+    {
+        Debug.Log($"FoodWaveController is running");
+        Debug.Log($"Current wave is '{currentWave}'");
+
+        yield return new WaitForSeconds(foodSpawnStartWait);
+
+        for (int wave = 0; wave < (foodMap.foodWaveCount - 1); wave++)
+        {
+            yield return new WaitForSeconds(waveDurationInSeconds);
+            currentWave++;
+            Debug.Log($"Current wave is '{currentWave}'");
+        }
+    }
+
     IEnumerator SpawnFood()
     {
-        FoodMap foodmap = new FoodMap(waveCount);
+        yield return new WaitForSeconds(foodSpawnStartWait);
 
-        yield return new WaitForSeconds(startWait);
-        for (int wave = 0; wave < foodmap.FoodWaveCount; wave++)
+        while (!gameOver)
         {
-            Debug.Log($"Spawning food for wave #{wave}");
-
-            for (int i = 0; i < foodmap.GetFoodWaveMaxItems(wave); i++)
+            if (foodMap.WaveHasUnoccupiedPositions(currentWave))
             {
-                Vector2Int position;
-
-                position = foodmap.GetRandomUnoccupiedWavePosition(wave);
+                Vector2Int position = foodMap.GetRandomUnoccupiedWavePosition(currentWave);
 
                 Debug.Log($"Spawning at {position.x}, {position.y}");
 
                 InstantiateGameObjectAtPosition(plantFood, position);
 
-                foodmap.MarkOccupied(position);
-
-                yield return new WaitForSeconds(spawnWait);
+                foodMap.MarkOccupied(position);
             }
-            yield return new WaitForSeconds(waveWait);
+
+            yield return new WaitForSeconds(foodSpawnWait);
         }
     }
 
@@ -149,8 +166,7 @@ public class GameController : MonoBehaviour
 
         Instantiate(
             gameObject,
-            //levelGrid.GetCellCenterWorld(newPosition),
-            newPosition,
+            levelGrid.GetCellCenterWorld(newPosition),//newPosition,
             transform.rotation);
     }
 }
@@ -172,6 +188,45 @@ public class FoodWave
         maxColumn = wave;
     }
 
+    public bool HasUnoccupiedPositions(FoodMap foodMap)
+    {
+        List<int> fixedRows = new List<int> { minRow, maxRow };
+        List<int> fixedColumns = new List<int> { minColumn, maxColumn };
+
+        foreach (var row in fixedRows)
+        {
+            for (int column = minColumn; column <= maxColumn; ++column)
+            {
+                if (!foodMap.IsOccupied(new Vector2Int(row, column)))
+                {
+                    return true;
+                }
+            }
+        }
+
+        foreach (var column in fixedColumns)
+        {
+            for (int row = minRow + 1; row < maxRow; ++row)
+            {
+                if (!foodMap.IsOccupied(new Vector2Int(row, column)))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public bool IsPositionValid(int row, int column)
+    {
+        if (((row == minRow) || (row == maxRow)) && (column >= minColumn) && (column <= maxColumn))
+            return true;
+        else if (((column == minColumn) || (column == maxColumn)) && (row >= minRow) && (row <= maxRow))
+            return true;
+
+        return false;
+    }
 
     public Vector2Int GetRandomPosition()
     {
@@ -203,25 +258,25 @@ public class FoodWave
 
 public class FoodMap
 {
-    public int FoodWaveCount
-    {
-        get;
-    }
+    public readonly int foodWaveCount;
+
+    public readonly int CurrentWave;
 
     private readonly bool[,] foodMap;
     private readonly List<FoodWave> foodwaves = new List<FoodWave>();
-    
 
     private readonly int rowCount;
     private readonly int columnCount;
-    
+
     public FoodMap(int waveCount)
     {
-        FoodWaveCount = waveCount;
+        foodWaveCount = waveCount;
+
+        CurrentWave = 0;
 
         CreateFoodWaves();
 
-        rowCount = waveCount*2 + 1;
+        rowCount = waveCount * 2 + 1;
         columnCount = rowCount;
 
         foodMap = new bool[rowCount, columnCount];
@@ -233,6 +288,11 @@ public class FoodMap
                 foodMap[i, j] = false;
             }
         }
+    }
+
+    public bool WaveHasUnoccupiedPositions(int wave)
+    {
+        return foodwaves[wave].HasUnoccupiedPositions(this);
     }
 
     public Vector2Int GetRandomUnoccupiedWavePosition(int wave)
@@ -248,11 +308,11 @@ public class FoodMap
         return position;
     }
 
-    public bool IsOccupied(Vector2 position)
+    public bool IsOccupied(Vector2Int position)
     {
 
-        int row = (int)position.x + (rowCount/2);
-        int column = (int)position.y + (columnCount/2);
+        int row = position.x + (rowCount / 2);
+        int column = position.y + (columnCount / 2);
 
         return IsOccupied(row, column);
     }
@@ -261,8 +321,8 @@ public class FoodMap
 
     public void MarkOccupied(Vector2 position)
     {
-        int row = (int)position.x + (rowCount/2);
-        int column = (int)position.y + (columnCount/2);
+        int row = (int)position.x + (rowCount / 2);
+        int column = (int)position.y + (columnCount / 2);
 
         MarkOccupied(row, column);
     }
@@ -273,7 +333,7 @@ public class FoodMap
 
     private void CreateFoodWaves()
     {
-        for (int i = 1; i <= FoodWaveCount; ++i)
+        for (int i = 1; i <= foodWaveCount; ++i)
         {
             FoodWave foodwave = new FoodWave(i);
             foodwaves.Add(foodwave);
