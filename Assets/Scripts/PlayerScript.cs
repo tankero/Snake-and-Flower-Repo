@@ -8,7 +8,7 @@ public class PlayerScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        manager = GameObject.Find("Game Controller").GetComponent<GameController>();
     }
 
     // Update is called once per frame
