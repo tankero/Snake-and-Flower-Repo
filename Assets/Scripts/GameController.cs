@@ -94,16 +94,16 @@ public class GameController : MonoBehaviour
         switch (direction)
         {
             case Direction.Up:
-                PlayerDestination = PlayerTransform.position + (Vector3.up * CellSize);
+                PlayerDestination = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerTransform.position + Vector3.up * CellSize));
                 break;
             case Direction.Down:
-                PlayerDestination = PlayerTransform.position + (Vector3.down * CellSize);
+                PlayerDestination = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerTransform.position + Vector3.down * CellSize));
                 break;
             case Direction.Left:
-                PlayerDestination = PlayerTransform.position + (Vector3.left * CellSize);
+                PlayerDestination = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerTransform.position + Vector3.left * CellSize));
                 break;
             case Direction.Right:
-                PlayerDestination = PlayerTransform.position + (Vector3.right * CellSize);
+                PlayerDestination = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerTransform.position + Vector3.right * CellSize));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
@@ -113,9 +113,13 @@ public class GameController : MonoBehaviour
     }
     public void ResetMovement()
     {
-        PlayerTransform.position = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerTransform.position));
-        PlayerDestination = PlayerTransform.position;
-        playerIsMoving = false;
+        //PlayerTransform.position = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerTransform.position));
+        //PlayerDestination = PlayerTransform.position;
+        //playerIsMoving = false;
+
+        var direction = Vector3Int.CeilToInt(PlayerDestination - PlayerTransform.position);
+        Debug.Log("Player movement direction is: " + direction);
+
     }
 
     IEnumerator FoodWaveController()
