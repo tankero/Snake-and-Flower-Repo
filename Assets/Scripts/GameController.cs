@@ -13,6 +13,7 @@ public class GameController : MonoBehaviour
     public float foodSpawnWait;
     public int waveCount;
     public int waveDurationInSeconds;
+    public int firstValidWave;
     public LevelManager Manager;
     public Button MenuButton;
     public Transform PlayerTransform;
@@ -24,7 +25,6 @@ public class GameController : MonoBehaviour
     public int CellSize = 32;
 
     private FoodMap foodMap;
-    private int currentWave;
     private bool gameOver = false;
 
     [SerializeField]
@@ -44,7 +44,7 @@ public class GameController : MonoBehaviour
         MenuButton.onClick.AddListener(() => Manager?.OnMenu());
         PlayerDestination = PlayerTransform.position;
 
-        foodMap = new FoodMap(waveCount);
+        foodMap = new FoodMap(waveCount, firstValidWave);
 
         StartCoroutine(FoodWaveController());
         StartCoroutine(SpawnFood());
@@ -125,15 +125,14 @@ public class GameController : MonoBehaviour
     IEnumerator FoodWaveController()
     {
         Debug.Log($"FoodWaveController is running");
-        Debug.Log($"Current wave is '{currentWave}'");
 
         yield return new WaitForSeconds(foodSpawnStartWait);
 
         for (int wave = 0; wave < (foodMap.foodWaveCount - 1); wave++)
         {
             yield return new WaitForSeconds(waveDurationInSeconds);
-            currentWave++;
-            Debug.Log($"Current wave is '{currentWave}'");
+
+            foodMap.IncrementCurrentWave();
         }
     }
 
@@ -143,9 +142,9 @@ public class GameController : MonoBehaviour
 
         while (!gameOver)
         {
-            if (foodMap.WaveHasUnoccupiedPositions(currentWave))
+            if (foodMap.CurrentWaveHasUnoccupiedPositions())
             {
-                Vector2Int position = foodMap.GetRandomUnoccupiedWavePosition(currentWave);
+                Vector2Int position = foodMap.GetCurrentWaveRandomUnoccupiedPosition();
 
                 Debug.Log($"Spawning at {position.x}, {position.y}");
 
@@ -269,23 +268,41 @@ public class FoodMap
 {
     public readonly int foodWaveCount;
 
-    public readonly int CurrentWave;
+    private int CurrentWave;
 
     private readonly bool[,] foodMap;
     private readonly List<FoodWave> foodwaves = new List<FoodWave>();
 
+    private readonly int WaveCount;
+
     private readonly int columnCount;
     private readonly int rowCount;
 
-    public FoodMap(int waveCount)
+    public FoodMap(int newWaveCount, int firstValidWave)
     {
-        foodWaveCount = waveCount;
+        WaveCount = newWaveCount;
+        foodWaveCount = WaveCount;
 
-        CurrentWave = 0;
+        // Set CurrentWave to start at the selected first valid wave.
+        CurrentWave = firstValidWave - 1;
+
+        // Bounds check CurrentWave.
+        // Not: CurrentWave is 0-based, but firstValidWave is 1-based.
+        if (CurrentWave < 0)
+        {
+            CurrentWave = 0;
+        }
+
+        if (CurrentWave >= WaveCount)
+        {
+            CurrentWave = WaveCount - 1;
+        }
+
+        Debug.Log($"Current wave is initialized to '{CurrentWave}'");
 
         CreateFoodWaves();
 
-        columnCount = waveCount * 2 + 1; ;
+        columnCount = WaveCount * 2 + 1; ;
         rowCount = columnCount;
 
         foodMap = new bool[columnCount, rowCount];
@@ -299,19 +316,30 @@ public class FoodMap
         }
     }
 
-    public bool WaveHasUnoccupiedPositions(int wave)
+    public void IncrementCurrentWave()
     {
-        return foodwaves[wave].HasUnoccupiedPositions(this);
+        // Make sure the currentWave does not exceed the waveCount.
+        if (CurrentWave < (WaveCount - 1))
+        {
+            CurrentWave++;
+        }
+
+        Debug.Log($"Current wave is '{CurrentWave}'");
     }
 
-    public Vector2Int GetRandomUnoccupiedWavePosition(int wave)
+    public bool CurrentWaveHasUnoccupiedPositions()
+    {
+        return foodwaves[CurrentWave].HasUnoccupiedPositions(this);
+    }
+
+    public Vector2Int GetCurrentWaveRandomUnoccupiedPosition()
     {
         Vector2Int position;
 
         // Find an unoccupied position to spawn the plant food.
         do
         {
-            position = foodwaves[wave].GetRandomPosition();
+            position = foodwaves[CurrentWave].GetRandomPosition();
         } while (IsOccupied(position));
 
         return position;
