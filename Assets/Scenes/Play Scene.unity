@@ -3384,6 +3384,9 @@ MonoBehaviour:
   foodSpawnWait: 3
   waveCount: 3
   waveDurationInSeconds: 30
+  flowerInitialSeconds: 30
+  flowerMaxSeconds: 60
+  flowerWiltThresholdInSeconds: 10
   Manager: {fileID: 0}
   MenuButton: {fileID: 279486769}
   PlayerTransform: {fileID: 1099090135}
