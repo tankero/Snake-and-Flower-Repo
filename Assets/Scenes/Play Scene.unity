@@ -892,7 +892,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1099090132}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2, y: -4, z: 0}
+  m_LocalPosition: {x: 0, y: -5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -3380,10 +3380,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   plantFood: {fileID: 7012926166109139369, guid: 9e7ae1135e38c9f498d503722d81b709,
     type: 3}
-  foodSpawnStartWait: 7
-  foodSpawnWait: 3
-  waveCount: 3
+  foodSpawnStartWait: 3
+  foodSpawnWait: 5
+  waveCount: 5
   waveDurationInSeconds: 30
+  firstValidWave: 2
   flowerInitialSeconds: 30
   flowerMaxSeconds: 60
   flowerWiltThresholdInSeconds: 10
