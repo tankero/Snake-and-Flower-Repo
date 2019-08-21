@@ -100,16 +100,16 @@ public class GameController : MonoBehaviour
         switch (direction)
         {
             case Direction.Up:
-                PlayerDestination = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerTransform.position + Vector3.up * CellSize));
+                PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.up * CellSize));
                 break;
             case Direction.Down:
-                PlayerDestination = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerTransform.position + Vector3.down * CellSize));
+                PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.down * CellSize));
                 break;
             case Direction.Left:
-                PlayerDestination = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerTransform.position + Vector3.left * CellSize));
+                PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.left * CellSize));
                 break;
             case Direction.Right:
-                PlayerDestination = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerTransform.position + Vector3.right * CellSize));
+                PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.right * CellSize));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
@@ -123,7 +123,7 @@ public class GameController : MonoBehaviour
         //PlayerDestination = PlayerTransform.position;
         //playerIsMoving = false;
 
-        var direction = Vector3Int.CeilToInt(PlayerDestination - PlayerTransform.position);
+        var direction = levelGrid.WorldToCell(PlayerDestination - levelGrid.CellToWorld(levelGrid.WorldToCell(PlayerTransform.position)));
         Debug.Log("Player movement direction is: " + direction);
 
     }
