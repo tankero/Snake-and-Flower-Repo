@@ -31,8 +31,8 @@ public class GameController : MonoBehaviour
     private FoodMap foodMap;
     private bool gameOver = false;
 
-    [SerializeField]
-    public static int snakeScore;
+
+    public int snakeScore;
 
     public enum Direction
     {
@@ -50,7 +50,7 @@ public class GameController : MonoBehaviour
 
         foodMap = new FoodMap(waveCount, firstValidWave);
         flower = new Flower(flowerInitialSeconds, flowerMaxSeconds, flowerWiltThresholdInSeconds);
-        foodMap = new FoodMap(waveCount);
+        foodMap = new FoodMap(waveCount, 2);
 
         StartCoroutine(FoodWaveController());
         StartCoroutine(SpawnFood());
@@ -87,7 +87,7 @@ public class GameController : MonoBehaviour
         {
             PlayerTransform.position = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerDestination));
             playerIsMoving = false;
-
+            PlayerTransform.GetComponent<PlayerScript>().Traversing = false;
         }
         else
         {
@@ -118,15 +118,24 @@ public class GameController : MonoBehaviour
 
         playerIsMoving = true;
     }
-    public void ResetMovement()
+
+
+    public void GoToOppositeEdge(Vector3 directionalVector)
     {
-        //PlayerTransform.position = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerTransform.position));
-        //PlayerDestination = PlayerTransform.position;
-        //playerIsMoving = false;
 
-        var direction = levelGrid.WorldToCell(PlayerDestination - levelGrid.CellToWorld(levelGrid.WorldToCell(PlayerTransform.position)));
-        Debug.Log("Player movement direction is: " + direction);
+        PlayerTransform.position = new Vector3(PlayerTransform.position.x * directionalVector.x,
+            PlayerTransform.position.y * directionalVector.y, 0f);
+        PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position));
 
+
+
+    }
+
+    public void AddSecondsToFlower(int secondsToAdd)
+    {
+        Debug.Log("Adding " + secondsToAdd + " seconds to flower");
+        flower.IncrementFlowerSeconds(secondsToAdd);
+        Debug.Log("Flower total is now " + flower.SecondsRemaining);
     }
 
     IEnumerator FoodWaveController()
@@ -413,7 +422,7 @@ public class FoodMap
 public class Flower
 {
     public int SecondsRemaining
-    { get; private set; }
+    { get; set; }
 
     public int MaxSecondsRemaining
     { get; private set; }
@@ -428,6 +437,9 @@ public class Flower
         Wilting,
         Dead
     }
+
+
+
 
     public Health CurrentHealth
     { get; private set; }
