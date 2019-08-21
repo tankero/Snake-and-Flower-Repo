@@ -14,6 +14,9 @@ public class GameController : MonoBehaviour
     public int waveCount;
     public int waveDurationInSeconds;
     public int firstValidWave;
+    public int flowerInitialSeconds;
+    public int flowerMaxSeconds;
+    public int flowerWiltThresholdInSeconds;
     public LevelManager Manager;
     public Button MenuButton;
     public Transform PlayerTransform;
@@ -24,6 +27,7 @@ public class GameController : MonoBehaviour
     public float PlayerSpeed = 1f;
     public int CellSize = 32;
 
+    private Flower flower;
     private FoodMap foodMap;
     private bool gameOver = false;
 
@@ -45,9 +49,12 @@ public class GameController : MonoBehaviour
         PlayerDestination = PlayerTransform.position;
 
         foodMap = new FoodMap(waveCount, firstValidWave);
+        flower = new Flower(flowerInitialSeconds, flowerMaxSeconds, flowerWiltThresholdInSeconds);
+        foodMap = new FoodMap(waveCount);
 
         StartCoroutine(FoodWaveController());
         StartCoroutine(SpawnFood());
+        StartCoroutine(FlowerCountdownTimer());
     }
 
     // Update is called once per frame
@@ -154,6 +161,22 @@ public class GameController : MonoBehaviour
             }
 
             yield return new WaitForSeconds(foodSpawnWait);
+        }
+
+        Debug.Log("Game is over. No more food will be spawned.");
+    }
+
+    IEnumerator FlowerCountdownTimer()
+    {
+        while (!gameOver)
+        {
+            yield return new WaitForSeconds(1);
+            flower.DecrementFlowerSeconds(1);
+            if (flower.CurrentHealth == Flower.Health.Dead)
+            {
+                Debug.Log("Flower has died. GAME OVER!");
+                gameOver = true;
+            }
         }
     }
 
@@ -384,5 +407,88 @@ public class FoodMap
             FoodWave foodwave = new FoodWave(i);
             foodwaves.Add(foodwave);
         }
+    }
+}
+
+public class Flower
+{
+    public int SecondsRemaining
+    { get; private set; }
+
+    public int MaxSecondsRemaining
+    { get; private set; }
+
+    public int WiltThreshold
+    { get; private set; }
+
+    public enum Health
+    {
+        MaxHealth,
+        Alive,
+        Wilting,
+        Dead
+    }
+
+    public Health CurrentHealth
+    { get; private set; }
+
+    private static readonly object lockobj = new object();
+    
+    public Flower(
+        int initialSecondsRemaining, 
+        int newMaxSecondsRemaining,
+        int newWiltThreshold)
+    {
+        SecondsRemaining = initialSecondsRemaining;
+        MaxSecondsRemaining = newMaxSecondsRemaining;
+        WiltThreshold = newWiltThreshold;
+        UpdateCurrentHealth();
+    }
+
+    public void IncrementFlowerSeconds(int numberOfSeconds)
+    {
+        lock (lockobj)
+        {
+            SecondsRemaining = Math.Min(SecondsRemaining + numberOfSeconds, MaxSecondsRemaining);
+            UpdateCurrentHealth();
+        }
+    }
+
+    public void DecrementFlowerSeconds(int numberOfSeconds)
+    {
+        lock (lockobj)
+        {
+            SecondsRemaining -= numberOfSeconds;
+            UpdateCurrentHealth();
+        }
+    }
+
+    private void UpdateCurrentHealth()
+    {
+        if (CurrentHealth == Health.Dead)
+        {
+            // There is no escaping Death.
+            return;
+        }
+        if (SecondsRemaining <= 0)
+        {
+            CurrentHealth = Health.Dead;
+            Debug.Log("Flower has died.");
+            return;
+        }
+        if (SecondsRemaining <= WiltThreshold)
+        {
+            CurrentHealth = Health.Wilting;
+            Debug.Log("Flower is wilting.");
+            return;
+        }
+        if (SecondsRemaining == MaxSecondsRemaining)
+        {
+            CurrentHealth = Health.MaxHealth;
+            Debug.Log("Flower is at max health.");
+            return;
+        }
+
+        CurrentHealth = Health.Alive;
     }
 }
