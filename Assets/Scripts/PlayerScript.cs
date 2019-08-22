@@ -40,9 +40,10 @@ public class PlayerScript : MonoBehaviour
                 directionalVector.x = -1;
                 directionalVector.y = 1;
             }
+            controller.GoToOppositeEdge(directionalVector);
+            Traversing = true;
         }
-        controller.GoToOppositeEdge(directionalVector);
-        Traversing = true;
+
 
 
     }
