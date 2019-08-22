@@ -936,7 +936,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6ddf5b1bb7fb9548997ef51eab5f9b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  manager: {fileID: 0}
+  controller: {fileID: 0}
+  Traversing: 0
 --- !u!1 &1298867962
 GameObject:
   m_ObjectHideFlags: 0
@@ -3388,6 +3389,7 @@ MonoBehaviour:
   flowerInitialSeconds: 30
   flowerMaxSeconds: 60
   flowerWiltThresholdInSeconds: 10
+  flowerSecondsGainedPerFood: 5
   Manager: {fileID: 0}
   MenuButton: {fileID: 279486769}
   PlayerTransform: {fileID: 1099090135}
