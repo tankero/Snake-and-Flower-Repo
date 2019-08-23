@@ -30,7 +30,7 @@ public class GameController : MonoBehaviour
     private Flower flower;
     private FoodMap foodMap;
     private bool gameOver = false;
-
+    private Slider flowerHealthSlider;
 
     public int snakeScore;
 
@@ -48,11 +48,13 @@ public class GameController : MonoBehaviour
         Manager = GameObject.Find("Level Manager")?.GetComponent<LevelManager>();
         MenuButton.onClick.AddListener(() => Manager?.OnMenu());
         PlayerDestination = PlayerTransform.position;
-
+        flowerHealthSlider = GameObject.Find("Flower Health Slider").GetComponent<Slider>();
         foodMap = new FoodMap(waveCount, firstValidWave);
         flower = new Flower(flowerInitialSeconds, flowerMaxSeconds, flowerWiltThresholdInSeconds);
         foodMap = new FoodMap(waveCount, 2);
-
+        flowerHealthSlider.maxValue = flower.MaxSecondsRemaining;
+        flowerHealthSlider.minValue = 0f;
+        flowerHealthSlider.wholeNumbers = true;
         StartCoroutine(FoodWaveController());
         StartCoroutine(SpawnFood());
         StartCoroutine(FlowerCountdownTimer());
@@ -61,6 +63,7 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
         if (!playerIsMoving)
         {
             if (Input.GetKeyDown(KeyCode.W))
@@ -84,6 +87,7 @@ public class GameController : MonoBehaviour
 
     void FixedUpdate()
     {
+        flowerHealthSlider.value = flower.SecondsRemaining;
         if (Vector3.Distance(PlayerTransform.position, PlayerDestination) <= 0.1f)
         {
             PlayerTransform.position = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerDestination));
@@ -117,7 +121,7 @@ public class GameController : MonoBehaviour
                 else if (EdgeJump)
                 {
                     PlayerTransform.position = new Vector3(PlayerTransform.position.x, PlayerTransform.position.y * -1, 0f);
-                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.down * CellSize));
+                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position));
                 }
                 break;
             case Direction.Left:
@@ -126,7 +130,7 @@ public class GameController : MonoBehaviour
                 else if (EdgeJump)
                 {
                     PlayerTransform.position = new Vector3(PlayerTransform.position.x * -1, PlayerTransform.position.y, 0f);
-                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.left * CellSize));
+                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position));
                 }
                 break;
             case Direction.Right:
@@ -135,7 +139,7 @@ public class GameController : MonoBehaviour
                 else if (EdgeJump)
                 {
                     PlayerTransform.position = new Vector3(PlayerTransform.position.x * -1, PlayerTransform.position.y, 0f);
-                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.right * CellSize));
+                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position));
                 }
                 break;
             default:
