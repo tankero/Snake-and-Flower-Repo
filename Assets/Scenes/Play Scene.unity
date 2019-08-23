@@ -1282,6 +1282,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
+  Traversing: 0
 --- !u!1 &1244670098
 GameObject:
   m_ObjectHideFlags: 0
@@ -1442,6 +1443,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1244670098}
   m_CullTransparentMesh: 0
+
 --- !u!1 &1298867962
 GameObject:
   m_ObjectHideFlags: 0
@@ -4444,6 +4446,7 @@ MonoBehaviour:
   flowerInitialSeconds: 30
   flowerMaxSeconds: 60
   flowerWiltThresholdInSeconds: 10
+  flowerSecondsGainedPerFood: 5
   Manager: {fileID: 0}
   MenuButton: {fileID: 279486769}
   PlayerTransform: {fileID: 1099090135}

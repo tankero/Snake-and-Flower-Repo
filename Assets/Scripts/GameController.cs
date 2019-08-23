@@ -17,6 +17,7 @@ public class GameController : MonoBehaviour
     public int flowerInitialSeconds;
     public int flowerMaxSeconds;
     public int flowerWiltThresholdInSeconds;
+    public int flowerSecondsGainedPerFood;
     public LevelManager Manager;
     public Button MenuButton;
     public Transform PlayerTransform;
@@ -29,7 +30,9 @@ public class GameController : MonoBehaviour
     public bool EdgeJump = true;
     private Flower flower;
     private FoodMap foodMap;
+    private Snake snake;
     private bool gameOver = false;
+
     private Slider flowerHealthSlider;
 
     public int snakeScore;
@@ -51,10 +54,15 @@ public class GameController : MonoBehaviour
         flowerHealthSlider = GameObject.Find("Flower Health Slider").GetComponent<Slider>();
         foodMap = new FoodMap(waveCount, firstValidWave);
         flower = new Flower(flowerInitialSeconds, flowerMaxSeconds, flowerWiltThresholdInSeconds);
+
+        snake = new Snake();
+
+
         foodMap = new FoodMap(waveCount, 2);
         flowerHealthSlider.maxValue = flower.MaxSecondsRemaining;
         flowerHealthSlider.minValue = 0f;
         flowerHealthSlider.wholeNumbers = true;
+
         StartCoroutine(FoodWaveController());
         StartCoroutine(SpawnFood());
         StartCoroutine(FlowerCountdownTimer());
@@ -152,20 +160,9 @@ public class GameController : MonoBehaviour
 
     public void GoToOppositeEdge(Vector3 directionalVector)
     {
-
         PlayerTransform.position = new Vector3(PlayerTransform.position.x * directionalVector.x,
             PlayerTransform.position.y * directionalVector.y, 0f);
         PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position));
-
-
-
-    }
-
-    public void AddSecondsToFlower(int secondsToAdd)
-    {
-        Debug.Log("Adding " + secondsToAdd + " seconds to flower");
-        flower.IncrementFlowerSeconds(secondsToAdd);
-        Debug.Log("Flower total is now " + flower.SecondsRemaining);
     }
 
     IEnumerator FoodWaveController()
@@ -177,6 +174,12 @@ public class GameController : MonoBehaviour
         for (int wave = 0; wave < (foodMap.foodWaveCount - 1); wave++)
         {
             yield return new WaitForSeconds(waveDurationInSeconds);
+
+            if (gameOver)
+            {
+                Debug.Log("Game is over. Wave controller shutting down.");
+                break;
+            }
 
             foodMap.IncrementCurrentWave();
         }
@@ -192,7 +195,7 @@ public class GameController : MonoBehaviour
             {
                 Vector2Int position = foodMap.GetCurrentWaveRandomUnoccupiedPosition();
 
-                Debug.Log($"Spawning at {position.x}, {position.y}");
+                Debug.Log($"Spawning food at {position.x}, {position.y}");
 
                 InstantiateGameObjectAtPosition(plantFood, position);
 
@@ -219,10 +222,25 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void AddToScore(int pointsToAdd)
+    // TODO: Make this function take the position of the food.
+    // Then, it can call ConsumeItem().
+    public void OnSnakeCollisionWithFood()
     {
-        snakeScore += pointsToAdd;
-        Debug.Log(snakeScore);
+        // When the snake collides with a plant food, 
+        // we want to increment the current food count of the snake.
+        snake.IncrementCurrentFoodCount(1);
+    }
+
+    public void OnSnakeCollisionWithFlower()
+    {
+        // When the snake collides with the flower,
+        // we want to convert the food carried by the snake 
+        // into life for the flower (in the form of time).
+        int foodCountToTransfer = snake.CurrentFoodCount;
+        snake.DerementCurrentFoodCount(foodCountToTransfer);
+
+        int flowerTimeIncreaseFromFood = flowerSecondsGainedPerFood * foodCountToTransfer;
+        flower.IncrementFlowerSeconds(flowerTimeIncreaseFromFood);
     }
 
     public void ConsumeItem(Vector2 position)
@@ -360,7 +378,7 @@ public class FoodMap
             CurrentWave = WaveCount - 1;
         }
 
-        Debug.Log($"Current wave is initialized to '{CurrentWave}'");
+        Debug.Log($"Current food wave is initialized to '{CurrentWave}'");
 
         CreateFoodWaves();
 
@@ -386,7 +404,7 @@ public class FoodMap
             CurrentWave++;
         }
 
-        Debug.Log($"Current wave is '{CurrentWave}'");
+        Debug.Log($"Current food wave is '{CurrentWave}'");
     }
 
     public bool CurrentWaveHasUnoccupiedPositions()
@@ -468,9 +486,6 @@ public class Flower
         Dead
     }
 
-
-
-
     public Health CurrentHealth
     { get; private set; }
 
@@ -512,6 +527,9 @@ public class Flower
             // There is no escaping Death.
             return;
         }
+
+        Debug.Log($"Flower SecondsRemaining: {SecondsRemaining}.");
+
         if (SecondsRemaining <= 0)
         {
             CurrentHealth = Health.Dead;
@@ -532,5 +550,36 @@ public class Flower
         }
 
         CurrentHealth = Health.Alive;
+    }
+}
+
+public class Snake
+{
+    public int CurrentFoodCount
+    { get; private set; }
+
+    private static readonly object lockobj = new object();
+
+    public Snake()
+    {
+        CurrentFoodCount = 0;
+    }
+
+    public void IncrementCurrentFoodCount(int amount)
+    {
+        lock (lockobj)
+        {
+            CurrentFoodCount += amount;
+            Debug.Log($"snake CurrentFoodCount = {CurrentFoodCount}");
+        }   
+    }
+
+    public void DerementCurrentFoodCount(int amount)
+    {
+        lock (lockobj)
+        {
+            CurrentFoodCount -= amount;
+            Debug.Log($"snake CurrentFoodCount = {CurrentFoodCount}");
+        }
     }
 }

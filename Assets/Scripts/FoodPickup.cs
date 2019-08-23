@@ -5,7 +5,6 @@ using UnityEngine;
 public class FoodPickup : MonoBehaviour
 {
     [SerializeField] AudioClip foodPickupSFX;
-    [SerializeField] int pointsForfoodPickup = 100;
     private bool addedToScore;
 
 
@@ -15,7 +14,7 @@ public class FoodPickup : MonoBehaviour
         if (!addedToScore)
         {
             addedToScore = true;
-            FindObjectOfType<GameController>().AddToScore(pointsForfoodPickup);
+            FindObjectOfType<GameController>().OnSnakeCollisionWithFood();
             //AudioSource.PlayClipAtPoint(foodPickupSFX, Camera.main.transform.position);//future implementation of an audio effect
             Destroy(gameObject);
         }
