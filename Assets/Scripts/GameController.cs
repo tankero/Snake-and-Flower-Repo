@@ -26,7 +26,7 @@ public class GameController : MonoBehaviour
     public Direction PlayerDirection;
     public float PlayerSpeed = 1f;
     public int CellSize = 32;
-
+    public bool EdgeJump = true;
     private Flower flower;
     private FoodMap foodMap;
     private bool gameOver = false;
@@ -88,7 +88,7 @@ public class GameController : MonoBehaviour
         {
             PlayerTransform.position = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerDestination));
             playerIsMoving = false;
-            PlayerTransform.GetComponent<PlayerScript>().Traversing = false;
+
         }
         else
         {
@@ -104,7 +104,7 @@ public class GameController : MonoBehaviour
             case Direction.Up:
                 if (levelGrid.HasTile(Vector3Int.CeilToInt(PlayerTransform.position + Vector3.up * CellSize)))
                 PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.up * CellSize));
-                else
+                else if(EdgeJump)
                 {
                     PlayerTransform.position = new Vector3(PlayerTransform.position.x, PlayerTransform.position.y * -1, 0f);
                     PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell((PlayerTransform.position + Vector3.up * CellSize)));
@@ -114,7 +114,7 @@ public class GameController : MonoBehaviour
             case Direction.Down:
                 if (levelGrid.HasTile(Vector3Int.FloorToInt(PlayerTransform.position + Vector3.down * CellSize)))
                 PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.down * CellSize));
-                else
+                else if (EdgeJump)
                 {
                     PlayerTransform.position = new Vector3(PlayerTransform.position.x, PlayerTransform.position.y * -1, 0f);
                     PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.down * CellSize));
@@ -123,7 +123,7 @@ public class GameController : MonoBehaviour
             case Direction.Left:
                 if (levelGrid.HasTile(Vector3Int.FloorToInt(PlayerTransform.position + Vector3.left * CellSize)))
                     PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.left * CellSize));
-                else
+                else if (EdgeJump)
                 {
                     PlayerTransform.position = new Vector3(PlayerTransform.position.x * -1, PlayerTransform.position.y, 0f);
                     PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.left * CellSize));
@@ -132,7 +132,7 @@ public class GameController : MonoBehaviour
             case Direction.Right:
                 if (levelGrid.HasTile(Vector3Int.CeilToInt(PlayerTransform.position + Vector3.right * CellSize)))
                     PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.right * CellSize));
-                else
+                else if (EdgeJump)
                 {
                     PlayerTransform.position = new Vector3(PlayerTransform.position.x * -1, PlayerTransform.position.y, 0f);
                     PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.right * CellSize));
