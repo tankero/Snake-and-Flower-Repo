@@ -8,7 +8,7 @@ public class PlayerScript : MonoBehaviour
 
 
     //Is the player jumping from one edge to the other?
-    public bool Traversing = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -23,26 +23,6 @@ public class PlayerScript : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (Traversing)
-        {
-            return;
-        }
-        var directionalVector = new Vector3();
-        if (collision.gameObject.name.Contains("Exit"))
-        {
-            if (collision.gameObject.name.Contains("Up") || collision.gameObject.name.Contains("Down"))
-            {
-                directionalVector.x = 1;
-                directionalVector.y = -1;
-            }
-            else
-            {
-                directionalVector.x = -1;
-                directionalVector.y = 1;
-            }
-            controller.GoToOppositeEdge(directionalVector);
-            Traversing = true;
-        }
 
 
 

@@ -7,6 +7,10 @@ public class FoodDropOff : MonoBehaviour
     [SerializeField] AudioClip foodDropSFX;
     private GameController controller;
 
+    [SerializeField]
+    private int foodTimeValue = 5;
+
+
     //Adding start to find reference to game controller.
     void Start()
     {
