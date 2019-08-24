@@ -12,8 +12,8 @@ public class GameController : MonoBehaviour
     public float foodSpawnStartWait;
     public float foodSpawnWait;
     public int waveCount;
-    public int waveDurationInSeconds;
     public int firstValidWave;
+    public int waveDurationInSeconds;
     public int flowerInitialSeconds;
     public int flowerMaxSeconds;
     public int flowerWiltThresholdInSeconds;
@@ -169,12 +169,8 @@ public class GameController : MonoBehaviour
 
         yield return new WaitForSeconds(foodSpawnStartWait);
 
-        int lastWave = foodMap.foodWaveCount - 1;
-
-        for (int wave = 0; wave < (lastWave - 1); ++wave)
+        while (!foodMap.AtLastWave())
         {
-            Debug.Log($"FoodWaveController: food wave #{wave + 1}.");
-
             yield return new WaitForSeconds(waveDurationInSeconds);
 
             if (gameOver)
@@ -185,6 +181,8 @@ public class GameController : MonoBehaviour
 
             foodMap.IncrementCurrentWave();
         }
+
+        Debug.Log($"FoodWaveController is done.");
     }
 
     IEnumerator SpawnFood()
@@ -387,7 +385,7 @@ public class FoodMap
             CurrentWave = WaveCount - 1;
         }
 
-        Debug.Log($"Current food wave is initialized to '{CurrentWave}'");
+        Debug.Log($"Current food wave is initialized to '{CurrentWave + 1}'");
 
         CreateFoodWaves();
 
@@ -403,6 +401,11 @@ public class FoodMap
                 foodMap[column, row] = false;
             }
         }
+    }
+
+    public bool AtLastWave()
+    {
+        return CurrentWave == (WaveCount - 1);
     }
 
     public void IncrementCurrentWave()
