@@ -237,8 +237,6 @@ public class GameController : MonoBehaviour
         }
     }
 
-    // TODO: Make this function take the position of the food.
-    // Then, it can call ConsumeItem().
     public void OnSnakeCollisionWithFood(Vector2Int position)
     {
         // When the snake collides with a plant food, 
