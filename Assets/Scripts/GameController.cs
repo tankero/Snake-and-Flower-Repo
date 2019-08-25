@@ -224,11 +224,13 @@ public class GameController : MonoBehaviour
 
     // TODO: Make this function take the position of the food.
     // Then, it can call ConsumeItem().
-    public void OnSnakeCollisionWithFood()
+    public void OnSnakeCollisionWithFood(Vector2Int position)
     {
         // When the snake collides with a plant food, 
         // we want to increment the current food count of the snake.
         snake.IncrementCurrentFoodCount(1);
+
+        foodMap.MarkUnoccupied(position);
     }
 
     public void OnSnakeCollisionWithFlower()
