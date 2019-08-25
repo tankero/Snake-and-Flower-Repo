@@ -5752,10 +5752,10 @@ MonoBehaviour:
   waveCount: 5
   waveDurationInSeconds: 30
   firstValidWave: 2
-  flowerInitialSeconds: 20
+  flowerInitialSeconds: 30
   flowerMaxSeconds: 60
   flowerWiltThresholdInSeconds: 10
-  flowerSecondsGainedPerFood: 0
+  flowerSecondsGainedPerFood: 5
   Manager: {fileID: 0}
   MenuButton: {fileID: 279486769}
   PlayerTransform: {fileID: 1099090135}
