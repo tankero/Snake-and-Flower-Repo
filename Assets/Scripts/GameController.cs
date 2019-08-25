@@ -9,7 +9,6 @@ using Random = UnityEngine.Random;
 public class GameController : MonoBehaviour
 {
     public GameObject plantFood;
-    public GameObject PlayerSnake;
     public float foodSpawnStartWait;
     public float foodSpawnWait;
     public int waveCount;
@@ -18,20 +17,25 @@ public class GameController : MonoBehaviour
     public int flowerInitialSeconds;
     public int flowerMaxSeconds;
     public int flowerWiltThresholdInSeconds;
+    public int flowerSecondsGainedPerFood;
     public LevelManager Manager;
     public Button MenuButton;
     public Transform PlayerTransform;
     public Tilemap levelGrid;
     public bool playerIsMoving = false;
     public Vector3 PlayerDestination;
+    public Direction PlayerDirection;
 
     public float PlayerSpeed = 1f;
     public int CellSize = 32;
+    public bool EdgeJump = true;
 
     public Flower flower;
     private FoodMap foodMap;
+    private Snake snake;
     private bool gameOver = false;
 
+    private Slider flowerHealthSlider;
 
     public int snakeScore;
 
@@ -43,7 +47,8 @@ public class GameController : MonoBehaviour
         Up,
         Down,
         Left,
-        Right
+        Right,
+        None
     }
 
     private void Start()
@@ -51,10 +56,15 @@ public class GameController : MonoBehaviour
         Manager = GameObject.Find("Level Manager")?.GetComponent<LevelManager>();
         MenuButton.onClick.AddListener(() => Manager?.OnMenu());
         PlayerDestination = PlayerTransform.position;
-
-        foodMap = new FoodMap(waveCount, firstValidWave);
+        flowerHealthSlider = GameObject.Find("Flower Health Slider").GetComponent<Slider>();
+        foodMap = new FoodMap(levelGrid, waveCount, firstValidWave);
         flower = new Flower(flowerInitialSeconds, flowerMaxSeconds, flowerWiltThresholdInSeconds);
-        foodMap = new FoodMap(waveCount, 2);
+
+        snake = new Snake();
+
+        flowerHealthSlider.maxValue = flower.MaxSecondsRemaining;
+        flowerHealthSlider.minValue = 0f;
+        flowerHealthSlider.wholeNumbers = true;
 
         StartCoroutine(FoodWaveController());
         StartCoroutine(SpawnFood());
@@ -87,11 +97,12 @@ public class GameController : MonoBehaviour
 
     void FixedUpdate()
     {
+        flowerHealthSlider.value = flower.SecondsRemaining;
         if (Vector3.Distance(PlayerTransform.position, PlayerDestination) <= 0.1f)
         {
             PlayerTransform.position = levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(PlayerDestination));
             playerIsMoving = false;
-            PlayerTransform.GetComponent<PlayerScript>().Traversing = false;
+
         }
         else
         {
@@ -105,16 +116,41 @@ public class GameController : MonoBehaviour
         switch (direction)
         {
             case Direction.Up:
+                if (levelGrid.HasTile(Vector3Int.CeilToInt(PlayerTransform.position + Vector3.up * CellSize)))
                 PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.up * CellSize));
+                else if(EdgeJump)
+                {
+                    PlayerTransform.position = new Vector3(PlayerTransform.position.x, PlayerTransform.position.y * -1, 0f);
+                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell((PlayerTransform.position + Vector3.up * CellSize)));
+
+                }
                 break;
             case Direction.Down:
+                if (levelGrid.HasTile(Vector3Int.FloorToInt(PlayerTransform.position + Vector3.down * CellSize)))
                 PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.down * CellSize));
+                else if (EdgeJump)
+                {
+                    PlayerTransform.position = new Vector3(PlayerTransform.position.x, PlayerTransform.position.y * -1, 0f);
+                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position));
+                }
                 break;
             case Direction.Left:
-                PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.left * CellSize));
+                if (levelGrid.HasTile(Vector3Int.FloorToInt(PlayerTransform.position + Vector3.left * CellSize)))
+                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.left * CellSize));
+                else if (EdgeJump)
+                {
+                    PlayerTransform.position = new Vector3(PlayerTransform.position.x * -1, PlayerTransform.position.y, 0f);
+                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position));
+                }
                 break;
             case Direction.Right:
-                PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.right * CellSize));
+                if (levelGrid.HasTile(Vector3Int.CeilToInt(PlayerTransform.position + Vector3.right * CellSize)))
+                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.right * CellSize));
+                else if (EdgeJump)
+                {
+                    PlayerTransform.position = new Vector3(PlayerTransform.position.x * -1, PlayerTransform.position.y, 0f);
+                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position));
+                }
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
@@ -148,12 +184,20 @@ public class GameController : MonoBehaviour
 
         yield return new WaitForSeconds(foodSpawnStartWait);
 
-        for (int wave = 0; wave < (foodMap.foodWaveCount - 1); wave++)
+        while (!foodMap.AtLastWave())
         {
             yield return new WaitForSeconds(waveDurationInSeconds);
 
+            if (gameOver)
+            {
+                Debug.Log("Game is over. Wave controller shutting down.");
+                break;
+            }
+
             foodMap.IncrementCurrentWave();
         }
+
+        Debug.Log($"FoodWaveController is done.");
     }
 
     IEnumerator SpawnFood()
@@ -162,11 +206,11 @@ public class GameController : MonoBehaviour
 
         while (!gameOver)
         {
-            if (foodMap.CurrentWaveHasUnoccupiedPositions())
+            if (foodMap.CurrentWaveHasValidUnoccupiedPositions())
             {
                 Vector2Int position = foodMap.GetCurrentWaveRandomUnoccupiedPosition();
 
-                Debug.Log($"Spawning at {position.x}, {position.y}");
+                Debug.Log($"Spawning food at {position.x}, {position.y}");
 
                 InstantiateGameObjectAtPosition(plantFood, position);
 
@@ -193,10 +237,27 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void AddToScore(int pointsToAdd)
+    // TODO: Make this function take the position of the food.
+    // Then, it can call ConsumeItem().
+    public void OnSnakeCollisionWithFood(Vector2Int position)
     {
-        snakeScore += pointsToAdd;
-        Debug.Log(snakeScore);
+        // When the snake collides with a plant food, 
+        // we want to increment the current food count of the snake.
+        snake.IncrementCurrentFoodCount(1);
+
+        foodMap.MarkUnoccupied(position);
+    }
+
+    public void OnSnakeCollisionWithFlower()
+    {
+        // When the snake collides with the flower,
+        // we want to convert the food carried by the snake 
+        // into life for the flower (in the form of time).
+        int foodCountToTransfer = snake.CurrentFoodCount;
+        snake.DerementCurrentFoodCount(foodCountToTransfer);
+
+        int flowerTimeIncreaseFromFood = flowerSecondsGainedPerFood * foodCountToTransfer;
+        flower.IncrementFlowerSeconds(flowerTimeIncreaseFromFood);
     }
 
     public void ConsumeItem(Vector2 position)
@@ -232,7 +293,7 @@ public class FoodWave
         maxColumn = wave;
     }
 
-    public bool HasUnoccupiedPositions(FoodMap foodMap)
+    public bool HasValidUnoccupiedPositions(FoodMap foodMap)
     {
         List<int> fixedRows = new List<int> { minRow, maxRow };
         List<int> fixedColumns = new List<int> { minColumn, maxColumn };
@@ -241,7 +302,8 @@ public class FoodWave
         {
             for (int column = minColumn; column <= maxColumn; ++column)
             {
-                if (!foodMap.IsOccupied(new Vector2Int(column, row)))
+                Vector2Int position = new Vector2Int(column, row);
+                if (foodMap.IsValidAndUnoccupied(position))
                 {
                     return true;
                 }
@@ -252,7 +314,8 @@ public class FoodWave
         {
             for (int row = minRow + 1; row < maxRow; ++row)
             {
-                if (!foodMap.IsOccupied(new Vector2Int(column, row)))
+                Vector2Int position = new Vector2Int(column, row);
+                if (foodMap.IsValidAndUnoccupied(position))
                 {
                     return true;
                 }
@@ -304,6 +367,7 @@ public class FoodMap
 {
     public readonly int foodWaveCount;
 
+    private readonly Tilemap levelGrid;
     private int CurrentWave;
 
     private readonly bool[,] foodMap;
@@ -314,8 +378,12 @@ public class FoodMap
     private readonly int columnCount;
     private readonly int rowCount;
 
-    public FoodMap(int newWaveCount, int firstValidWave)
+    public FoodMap(
+        Tilemap newLevelGrid, 
+        int newWaveCount, 
+        int firstValidWave)
     {
+        levelGrid = newLevelGrid;
         WaveCount = newWaveCount;
         foodWaveCount = WaveCount;
 
@@ -334,7 +402,7 @@ public class FoodMap
             CurrentWave = WaveCount - 1;
         }
 
-        Debug.Log($"Current wave is initialized to '{CurrentWave}'");
+        Debug.Log($"Current food wave is initialized to '{CurrentWave + 1}'");
 
         CreateFoodWaves();
 
@@ -352,6 +420,11 @@ public class FoodMap
         }
     }
 
+    public bool AtLastWave()
+    {
+        return CurrentWave == (WaveCount - 1);
+    }
+
     public void IncrementCurrentWave()
     {
         // Make sure the currentWave does not exceed the waveCount.
@@ -360,28 +433,48 @@ public class FoodMap
             CurrentWave++;
         }
 
-        Debug.Log($"Current wave is '{CurrentWave}'");
+        Debug.Log($"******* Current food wave is '{CurrentWave + 1}' *******");
     }
 
-    public bool CurrentWaveHasUnoccupiedPositions()
+    public bool CurrentWaveHasValidUnoccupiedPositions()
     {
-        return foodwaves[CurrentWave].HasUnoccupiedPositions(this);
+        return foodwaves[CurrentWave].HasValidUnoccupiedPositions(this);
     }
 
     public Vector2Int GetCurrentWaveRandomUnoccupiedPosition()
     {
         Vector2Int position;
 
+        bool validUnoccupiedPositionFound = false;
+
         // Find an unoccupied position to spawn the plant food.
         do
         {
             position = foodwaves[CurrentWave].GetRandomPosition();
-        } while (IsOccupied(position));
+
+            if (IsValidAndUnoccupied(position))
+            {
+                validUnoccupiedPositionFound = true;
+            }
+
+        } while (!validUnoccupiedPositionFound);
 
         return position;
     }
 
-    public bool IsOccupied(Vector2Int position)
+    public bool IsValidAndUnoccupied(Vector2Int position)
+    {
+        return (IsValid(position) && !IsOccupied(position));
+    }
+
+    private bool IsValid(Vector2Int position)
+    {
+        Vector3Int gridPosition = new Vector3Int(position.x, position.y, 0);
+
+        return levelGrid.HasTile(gridPosition);
+    }
+
+    private bool IsOccupied(Vector2Int position)
     {
         int column = position.x + (columnCount / 2);
         int row = position.y + (rowCount / 2);
@@ -389,7 +482,7 @@ public class FoodMap
         return IsOccupied(column, row);
     }
 
-    public bool IsOccupied(int column, int row) => foodMap[column, row];
+    private bool IsOccupied(int column, int row) => foodMap[column, row];
 
     public void MarkOccupied(Vector2 position)
     {
@@ -486,6 +579,9 @@ public class Flower
             // There is no escaping Death.
             return;
         }
+
+        Debug.Log($"Flower SecondsRemaining: {SecondsRemaining}.");
+
         if (SecondsRemaining <= 0)
         {
             CurrentHealth = Health.Dead;
@@ -507,5 +603,36 @@ public class Flower
         }
 
         CurrentHealth = Health.Alive;
+    }
+}
+
+public class Snake
+{
+    public int CurrentFoodCount
+    { get; private set; }
+
+    private static readonly object lockobj = new object();
+
+    public Snake()
+    {
+        CurrentFoodCount = 0;
+    }
+
+    public void IncrementCurrentFoodCount(int amount)
+    {
+        lock (lockobj)
+        {
+            CurrentFoodCount += amount;
+            Debug.Log($"snake CurrentFoodCount = {CurrentFoodCount}");
+        }   
+    }
+
+    public void DerementCurrentFoodCount(int amount)
+    {
+        lock (lockobj)
+        {
+            CurrentFoodCount -= amount;
+            Debug.Log($"snake CurrentFoodCount = {CurrentFoodCount}");
+        }
     }
 }
