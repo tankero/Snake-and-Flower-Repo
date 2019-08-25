@@ -18,6 +18,10 @@ public class GameController : MonoBehaviour
     public int flowerMaxSeconds;
     public int flowerWiltThresholdInSeconds;
     public int flowerSecondsGainedPerFood;
+
+    public GameObject rockObstacle;
+    public int rocksPerFoodWave;
+
     public LevelManager Manager;
     public Button MenuButton;
     public Transform PlayerTransform;
@@ -52,7 +56,12 @@ public class GameController : MonoBehaviour
         MenuButton.onClick.AddListener(() => Manager?.OnMenu());
         PlayerDestination = PlayerTransform.position;
         flowerHealthSlider = GameObject.Find("Flower Health Slider").GetComponent<Slider>();
+
         foodMap = new FoodMap(levelGrid, waveCount, firstValidWave);
+        
+        // This needs to be called after the foodMap is created.
+        SpawnRockObstacles();
+
         flower = new Flower(flowerInitialSeconds, flowerMaxSeconds, flowerWiltThresholdInSeconds);
 
         snake = new Snake();
@@ -259,6 +268,21 @@ public class GameController : MonoBehaviour
             levelGrid.GetCellCenterWorld(newPosition),//newPosition,
             transform.rotation);
     }
+
+    private void SpawnRockObstacles()
+    {
+        for (int wave = 0; wave < foodMap.foodWaveCount; ++wave)
+        {
+            for (int i = 0; i < rocksPerFoodWave; ++i)
+            {
+                Vector2Int position = foodMap.GetWaveRandomUnoccupiedPosition(wave);
+
+                foodMap.MarkOccupied(position);
+
+                InstantiateGameObjectAtPosition(rockObstacle, position);
+            }
+        }
+    }
 }
 
 public class FoodWave
@@ -428,6 +452,11 @@ public class FoodMap
 
     public Vector2Int GetCurrentWaveRandomUnoccupiedPosition()
     {
+        return GetWaveRandomUnoccupiedPosition(CurrentWave);
+    }
+
+    public Vector2Int GetWaveRandomUnoccupiedPosition(int wave)
+    {
         Vector2Int position;
 
         bool validUnoccupiedPositionFound = false;
@@ -435,7 +464,7 @@ public class FoodMap
         // Find an unoccupied position to spawn the plant food.
         do
         {
-            position = foodwaves[CurrentWave].GetRandomPosition();
+            position = foodwaves[wave].GetRandomPosition();
 
             if (IsValidAndUnoccupied(position))
             {
