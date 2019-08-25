@@ -9,6 +9,7 @@ using Random = UnityEngine.Random;
 public class GameController : MonoBehaviour
 {
     public GameObject plantFood;
+    public GameObject PlayerSnake;
     public float foodSpawnStartWait;
     public float foodSpawnWait;
     public int waveCount;
@@ -27,12 +28,15 @@ public class GameController : MonoBehaviour
     public float PlayerSpeed = 1f;
     public int CellSize = 32;
 
-    private Flower flower;
+    public Flower flower;
     private FoodMap foodMap;
     private bool gameOver = false;
 
 
     public int snakeScore;
+
+
+    public object Health { get; internal set; }
 
     public enum Direction
     {
@@ -491,6 +495,7 @@ public class Flower
         if (SecondsRemaining <= WiltThreshold)
         {
             CurrentHealth = Health.Wilting;
+           //flowerRenderer.sprite = wiltstage1; //this wasn't working
             Debug.Log("Flower is wilting.");
             return;
         }
