@@ -5756,6 +5756,9 @@ MonoBehaviour:
   flowerMaxSeconds: 60
   flowerWiltThresholdInSeconds: 10
   flowerSecondsGainedPerFood: 5
+  rockObstacle: {fileID: 3463666963134266150, guid: 2f9952fb41d58684091263de52737ee8,
+    type: 3}
+  rocksPerFoodWave: 3
   Manager: {fileID: 0}
   MenuButton: {fileID: 279486769}
   PlayerTransform: {fileID: 1099090135}
