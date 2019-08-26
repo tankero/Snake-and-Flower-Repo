@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 
@@ -26,7 +27,7 @@ public class GameController : MonoBehaviour
     public Tilemap levelGrid;
     public bool playerIsMoving = false;
     public Vector3 PlayerDestination;
-    public Direction PlayerDirection;
+    
 
     public float PlayerSpeed = 1f;
     public int CellSize = 32;
@@ -41,6 +42,11 @@ public class GameController : MonoBehaviour
 
     public int snakeScore;
 
+    public Image background;
+    public float backgroundFade = 5f;
+    public GameObject GameOverContainer;
+
+    public bool gameIsEnding = false;
 
     public object Health { get; internal set; }
 
@@ -59,9 +65,8 @@ public class GameController : MonoBehaviour
         MenuButton.onClick.AddListener(() => Manager?.OnMenu());
         PlayerDestination = PlayerTransform.position;
         flowerHealthSlider = GameObject.Find("Flower Health Slider").GetComponent<Slider>();
-
-        foodMap = new FoodMap(levelGrid, waveCount, firstValidWave);
         
+        foodMap = new FoodMap(levelGrid, waveCount, firstValidWave);
         // This needs to be called after the foodMap is created.
         SpawnRockObstacles();
 
@@ -76,6 +81,13 @@ public class GameController : MonoBehaviour
         StartCoroutine(FoodWaveController());
         StartCoroutine(SpawnFood());
         StartCoroutine(FlowerCountdownTimer());
+        var fixedColor = background.color;
+        fixedColor.a = 1;
+        background.color = fixedColor;
+        background.CrossFadeAlpha(0f, 0f, true);
+
+
+
     }
 
     // Update is called once per frame
@@ -104,6 +116,10 @@ public class GameController : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (gameOver)
+        {
+            return;
+        }
         flowerHealthSlider.value = flower.SecondsRemaining;
         if (Vector3.Distance(PlayerTransform.position, PlayerDestination) <= 0.1f)
         {
@@ -165,17 +181,14 @@ public class GameController : MonoBehaviour
 
         playerIsMoving = true;
     }
+        
 
-
-    public void GoToOppositeEdge(Vector3 directionalVector)
+    IEnumerator GameOver()
     {
-
-        PlayerTransform.position = new Vector3(PlayerTransform.position.x * directionalVector.x,
-            PlayerTransform.position.y * directionalVector.y, 0f);
-        PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position));
-
-
-
+        background.CrossFadeAlpha(1f, backgroundFade, true);
+        gameIsEnding = true;
+        yield return new WaitForSeconds(backgroundFade);
+        GameOverContainer.SetActive(true);
     }
 
     public void AddSecondsToFlower(int secondsToAdd)
@@ -227,7 +240,10 @@ public class GameController : MonoBehaviour
             yield return new WaitForSeconds(foodSpawnWait);
         }
 
+        if(!gameIsEnding)
+        StartCoroutine(GameOver());
         Debug.Log("Game is over. No more food will be spawned.");
+    
     }
 
     IEnumerator FlowerCountdownTimer()
@@ -278,6 +294,16 @@ public class GameController : MonoBehaviour
             gameObject,
             levelGrid.GetCellCenterWorld(newPosition),//newPosition,
             transform.rotation);
+    }
+
+    public void PlayAgain()
+    {
+        SceneManager.LoadScene(1);
+    }
+
+    public void BackToMenu()
+    {
+        SceneManager.LoadScene(0);
     }
 
     private void SpawnRockObstacles()
