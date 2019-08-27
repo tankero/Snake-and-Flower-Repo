@@ -5617,7 +5617,7 @@ MonoBehaviour:
     type: 3}
   foodSpawnStartWait: 3
   foodSpawnWait: 5
-  waveCount: 5
+  waveCount: 9
   waveDurationInSeconds: 30
   firstValidWave: 2
   flowerInitialSeconds: 25
@@ -5626,7 +5626,9 @@ MonoBehaviour:
   flowerSecondsGainedPerFood: 5
   rockObstacle: {fileID: 3463666963134266150, guid: 2f9952fb41d58684091263de52737ee8,
     type: 3}
-  rocksPerFoodWave: 3
+  logObstacle: {fileID: 613168181323480149, guid: 8755ca2b4c3a8ee45afefe1053a70784,
+    type: 3}
+  obstaclesPerFoodWave: 4
   Manager: {fileID: 0}
   MenuButton: {fileID: 279486769}
   PlayerTransform: {fileID: 1099090135}

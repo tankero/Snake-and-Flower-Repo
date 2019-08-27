@@ -19,7 +19,8 @@ public class GameController : MonoBehaviour
     public int flowerSecondsGainedPerFood;
 
     public GameObject rockObstacle;
-    public int rocksPerFoodWave;
+    public GameObject logObstacle;
+    public int obstaclesPerFoodWave;
 
     public LevelManager Manager;
     public Button MenuButton;
@@ -69,7 +70,7 @@ public class GameController : MonoBehaviour
         
         foodMap = new FoodMap(levelGrid, waveCount, firstValidWave);
         // This needs to be called after the foodMap is created.
-        SpawnRockObstacles();
+        SpawnObstacles();
 
         flower = new Flower(flowerInitialSeconds, flowerMaxSeconds, flowerWiltThresholdInSeconds);
 
@@ -312,18 +313,27 @@ public class GameController : MonoBehaviour
         SceneManager.LoadScene(0);
     }
 
-    private void SpawnRockObstacles()
+    private void SpawnObstacles()
     {
         for (int wave = 0; wave < foodMap.foodWaveCount; ++wave)
         {
-            for (int i = 0; i < rocksPerFoodWave; ++i)
+            for (int i = 0; i < obstaclesPerFoodWave; ++i)
             {
                 Vector2Int position = foodMap.GetWaveRandomUnoccupiedPosition(wave);
 
                 foodMap.MarkOccupied(position);
 
-                InstantiateGameObjectAtPosition(rockObstacle, position);
+                if (RandomBool())
+                {
+                    InstantiateGameObjectAtPosition(logObstacle, position);
+                }
+                else
+                {
+                    InstantiateGameObjectAtPosition(rockObstacle, position);
+                }
             }
         }
     }
+
+    private bool RandomBool() => (UnityEngine.Random.Range(0, 2) == 1);
 }
