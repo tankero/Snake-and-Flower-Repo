@@ -50,6 +50,7 @@ public class GameController : MonoBehaviour
 
     public object Health { get; internal set; }
 
+    
     public enum Direction
     {
         Up,
@@ -267,6 +268,11 @@ public class GameController : MonoBehaviour
         snake.IncrementCurrentFoodCount(1);
 
         foodMap.MarkUnoccupied(position);
+    }
+
+    public void AddToScore(int pointsToAdd)
+    {
+        snakeScore += pointsToAdd;
     }
 
     public void OnSnakeCollisionWithFlower()

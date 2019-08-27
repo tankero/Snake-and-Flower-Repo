@@ -5,7 +5,14 @@ using UnityEngine;
 public class FoodPickup : MonoBehaviour
 {
     [SerializeField] AudioClip foodPickupSFX;
+    [SerializeField] int pointsForfoodPickup = 100;
     private bool addedToScore;
+    private GameController controller;
+
+    private void Start()
+    {
+        controller = FindObjectOfType<GameController>();
+    }
     
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -20,7 +27,8 @@ public class FoodPickup : MonoBehaviour
                     (int)Mathf.Round(contactPoint.point.y));
 
             addedToScore = true;
-            FindObjectOfType<GameController>().OnSnakeCollisionWithFood(collisionPosition);
+            controller.AddToScore(pointsForfoodPickup);
+            controller.OnSnakeCollisionWithFood(collisionPosition);
             //AudioSource.PlayClipAtPoint(foodPickupSFX, Camera.main.transform.position);//future implementation of an audio effect
             Destroy(gameObject);
         }

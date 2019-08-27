@@ -31,6 +31,9 @@ public class FoodDropOff : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        flowerTotal += controller.snakeScore; //add to flower score
+        controller.snakeScore = 0; //set snake food to 0
+        Debug.Log("Total Flower points:" + flowerTotal);
         Debug.Log($"Food being dropped off by: {collision.gameObject}");
         controller.OnSnakeCollisionWithFlower();
     }
