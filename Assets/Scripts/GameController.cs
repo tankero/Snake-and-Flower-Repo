@@ -327,6 +327,10 @@ public class GameController : MonoBehaviour
 
     private void SpawnObstacles()
     {
+        // We don't want to spawn an obstacle on the snake's starting position.
+        Vector2Int snakeStartingPosition = new Vector2Int(0, -5);
+        foodMap.MarkOccupied(snakeStartingPosition);
+
         for (int wave = 0; wave < foodMap.foodWaveCount; ++wave)
         {
             for (int i = 0; i < obstaclesPerFoodWave; ++i)
@@ -345,6 +349,11 @@ public class GameController : MonoBehaviour
                 }
             }
         }
+
+        // Now that we are done spawning obstacles, 
+        // we can clear the snake's starting position. 
+        // This will allow food to spawn there.
+        foodMap.MarkUnoccupied(snakeStartingPosition);
     }
 
     private bool RandomBool() => (UnityEngine.Random.Range(0, 2) == 1);
