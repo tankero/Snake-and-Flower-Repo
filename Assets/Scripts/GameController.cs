@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
@@ -28,7 +29,7 @@ public class GameController : MonoBehaviour
     public Tilemap levelGrid;
     public bool playerIsMoving = false;
     public Vector3 PlayerDestination;
-    
+
 
     public float PlayerSpeed = 1f;
     public int CellSize = 32;
@@ -51,7 +52,7 @@ public class GameController : MonoBehaviour
 
     public object Health { get; internal set; }
 
-    
+
     public enum Direction
     {
         Up,
@@ -67,7 +68,7 @@ public class GameController : MonoBehaviour
         MenuButton.onClick.AddListener(() => Manager?.OnMenu());
         PlayerDestination = PlayerTransform.position;
         flowerHealthSlider = GameObject.Find("Flower Health Slider").GetComponent<Slider>();
-        
+
         foodMap = new FoodMap(levelGrid, waveCount, firstValidWave);
         // This needs to be called after the foodMap is created.
         SpawnObstacles();
@@ -95,25 +96,7 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!playerIsMoving)
-        {
-            if (Input.GetKeyDown(KeyCode.W))
-            {
-                MovePlayer(Direction.Up);
-            }
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-                MovePlayer(Direction.Down);
-            }
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-                MovePlayer(Direction.Left);
-            }
-            if (Input.GetKeyDown(KeyCode.D))
-            {
-                MovePlayer(Direction.Right);
-            }
-        }
+        
     }
 
     void FixedUpdate()
@@ -121,6 +104,10 @@ public class GameController : MonoBehaviour
         if (gameOver)
         {
             return;
+        }
+        if (!playerIsMoving)
+        {
+            MovePlayer();
         }
         flowerHealthSlider.value = flower.SecondsRemaining;
         if (Vector3.Distance(PlayerTransform.position, PlayerDestination) <= 0.1f)
@@ -136,54 +123,79 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void MovePlayer(Direction direction)
+    private bool TestForObstacles(Vector3 startLocation, Vector3 endLocation)
     {
-        switch (direction)
-        {
-            case Direction.Up:
-                if (levelGrid.HasTile(Vector3Int.CeilToInt(PlayerTransform.position + Vector3.up * CellSize)))
-                PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.up * CellSize));
-                else if(EdgeJump)
-                {
-                    PlayerTransform.position = new Vector3(PlayerTransform.position.x, PlayerTransform.position.y * -1, 0f);
-                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell((PlayerTransform.position + Vector3.up * CellSize)));
+        LayerMask mask = LayerMask.GetMask("Obstacle");
+        Debug.Log($"Testing direction:{endLocation - startLocation}");
 
-                }
-                break;
-            case Direction.Down:
-                if (levelGrid.HasTile(Vector3Int.FloorToInt(PlayerTransform.position + Vector3.down * CellSize)))
-                PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.down * CellSize));
-                else if (EdgeJump)
-                {
-                    PlayerTransform.position = new Vector3(PlayerTransform.position.x, PlayerTransform.position.y * -1, 0f);
-                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position));
-                }
-                break;
-            case Direction.Left:
-                if (levelGrid.HasTile(Vector3Int.FloorToInt(PlayerTransform.position + Vector3.left * CellSize)))
-                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.left * CellSize));
-                else if (EdgeJump)
-                {
-                    PlayerTransform.position = new Vector3(PlayerTransform.position.x * -1, PlayerTransform.position.y, 0f);
-                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position));
-                }
-                break;
-            case Direction.Right:
-                if (levelGrid.HasTile(Vector3Int.CeilToInt(PlayerTransform.position + Vector3.right * CellSize)))
-                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position + Vector3.right * CellSize));
-                else if (EdgeJump)
-                {
-                    PlayerTransform.position = new Vector3(PlayerTransform.position.x * -1, PlayerTransform.position.y, 0f);
-                    PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position));
-                }
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
+        Debug.DrawLine(startLocation, endLocation - startLocation, Color.red);
+        var hit = Physics2D.Raycast(startLocation, endLocation - startLocation, CellSize, mask);
+
+        if (hit.collider != null)
+        {
+            Debug.Log("Yep, that's an obstacle");
+            return true;
         }
 
+        return false;
+    }
+    public void MovePlayer()
+    {
+        var axisY = new Vector3(0f, Input.GetAxisRaw("Vertical"), 0f) * CellSize;
+        var axisX = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, 0f) * CellSize;
+        if (Math.Abs(Input.GetAxisRaw("Vertical")) > 0.0001)
+        {
+            
+            if (levelGrid.HasTile(Vector3Int.CeilToInt(PlayerTransform.position + axisY)))
+            {
+                
+                if (TestForObstacles(PlayerTransform.position, levelGrid.GetCellCenterWorld(
+                    levelGrid.WorldToCell(PlayerTransform.position + axisY))))
+                {
+                    return;
+                }
+                PlayerDestination =
+                        levelGrid.GetCellCenterWorld(
+                            levelGrid.WorldToCell(PlayerTransform.position + axisY));
+
+            }
+            else if (EdgeJump)
+            {
+                PlayerTransform.position = new Vector3(PlayerTransform.position.x, PlayerTransform.position.y * -1, 0f);
+                PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell((PlayerTransform.position + axisY)));
+
+            }
+        }
+        if (Math.Abs(Input.GetAxisRaw("Horizontal")) > 0.0001)
+        {
+            
+            if (levelGrid.HasTile(Vector3Int.CeilToInt(PlayerTransform.position + axisX)))
+            {
+
+                if (TestForObstacles(PlayerTransform.position, levelGrid.GetCellCenterWorld(
+                    levelGrid.WorldToCell(PlayerTransform.position + axisX))))
+                {
+                    return;
+                }
+                PlayerDestination =
+                    levelGrid.GetCellCenterWorld(
+                        levelGrid.WorldToCell(PlayerTransform.position + axisX));
+
+            }
+            else if (EdgeJump)
+            {
+                PlayerTransform.position = new Vector3(PlayerTransform.position.x * -1, PlayerTransform.position.y, 0f);
+                PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell((PlayerTransform.position + axisX)));
+
+            }
+        }
+
+        var direction = PlayerDestination - PlayerTransform.position;
+        var angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        PlayerTransform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
         playerIsMoving = true;
     }
-        
+
 
     IEnumerator GameOver()
     {
@@ -242,10 +254,10 @@ public class GameController : MonoBehaviour
             yield return new WaitForSeconds(foodSpawnWait);
         }
 
-        if(!gameIsEnding)
-        StartCoroutine(GameOver());
+        if (!gameIsEnding)
+            StartCoroutine(GameOver());
         Debug.Log("Game is over. No more food will be spawned.");
-    
+
     }
 
     IEnumerator FlowerCountdownTimer()

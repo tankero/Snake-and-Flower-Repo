@@ -23,22 +23,22 @@ public class PlayerScript : MonoBehaviour
     {//brute force for the snake facing animations
         if (controller.playerIsMoving == false)
         {
-            if (Input.GetKeyDown(KeyCode.W))
-            {
-                transform.localRotation = Quaternion.Euler(0, 0, 90);
-            }
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-            transform.localRotation = Quaternion.Euler(0, 0, -90);
-            }
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-            transform.localRotation = Quaternion.Euler(0, 0, 180);
-            }
-            if (Input.GetKeyDown(KeyCode.D))
-            {
-            transform.localRotation = Quaternion.Euler(0, 0, 0);
-            }
+            //if (Input.GetAxisRaw("Vertical") > 0)
+            //{
+            //    transform.localRotation = Quaternion.Euler(0, 0, 90);
+            //}
+            //if (Input.GetAxisRaw("Vertical") < 0)
+            //{
+            //transform.localRotation = Quaternion.Euler(0, 0, -90);
+            //}
+            //if (Input.GetAxisRaw("Horizontal") < 0)
+            //{
+            //transform.localRotation = Quaternion.Euler(0, 0, 180);
+            //}
+            //if (Input.GetAxisRaw("Horizontal") > 0)
+            //{
+            //transform.localRotation = Quaternion.Euler(0, 0, 0);
+            //}
         }
 
         if (controller.snakeScore > 0)//sets snake animation based on snakeScore Value
