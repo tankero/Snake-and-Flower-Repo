@@ -21,25 +21,25 @@ public class PlayerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {//brute force for the snake facing animations
-        if (controller.playerIsMoving == false)
+         /*if (controller.playerIsMoving == false)
         {
-            //if (Input.GetAxisRaw("Vertical") > 0)
-            //{
-            //    transform.localRotation = Quaternion.Euler(0, 0, 90);
-            //}
-            //if (Input.GetAxisRaw("Vertical") < 0)
-            //{
-            //transform.localRotation = Quaternion.Euler(0, 0, -90);
-            //}
-            //if (Input.GetAxisRaw("Horizontal") < 0)
-            //{
-            //transform.localRotation = Quaternion.Euler(0, 0, 180);
-            //}
-            //if (Input.GetAxisRaw("Horizontal") > 0)
-            //{
-            //transform.localRotation = Quaternion.Euler(0, 0, 0);
-            //}
-        }
+           if (Input.GetAxisRaw("Vertical") > 0)
+            {
+                transform.localRotation = Quaternion.Euler(0, 0, 90);
+            }
+            if (Input.GetAxisRaw("Vertical") < 0)
+            {
+            transform.localRotation = Quaternion.Euler(0, 0, -90);
+            }
+            if (Input.GetAxisRaw("Horizontal") < 0)
+            {
+            transform.localRotation = Quaternion.Euler(0, 0, 180);
+            }
+            if (Input.GetAxisRaw("Horizontal") > 0)
+            {
+            transform.localRotation = Quaternion.Euler(0, 0, 0);
+           }
+        } */
 
         if (controller.snakeScore > 0)//sets snake animation based on snakeScore Value
         {

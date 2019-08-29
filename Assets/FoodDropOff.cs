@@ -34,6 +34,7 @@ public class FoodDropOff : MonoBehaviour
         flowerTotal += controller.snakeScore; //add to flower score
         controller.snakeScore = 0; //set snake food to 0
         Debug.Log("Total Flower points:" + flowerTotal);
+        controller.AddSecondsToFlower(foodTimeValue);
         Debug.Log($"Food being dropped off by: {collision.gameObject}");
         controller.OnSnakeCollisionWithFlower();
     }
@@ -60,6 +61,11 @@ public class FoodDropOff : MonoBehaviour
              myRenderer.sprite = isWilting;
              //Debug.Log("WILTING CHANGE");
          }
+
+        if (controller.flower.SecondsRemaining > controller.flower.WiltThreshold)
+        {
+            myAnimator.enabled = true;
+        }
     }
 }
 
