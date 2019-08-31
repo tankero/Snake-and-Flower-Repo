@@ -5,9 +5,11 @@ using UnityEngine.Tilemaps;
 public class FoodMap
 {
     public readonly int foodWaveCount;
+    public int CurrentWave
+    { get; private set; }
 
     private readonly Tilemap levelGrid;
-    private int CurrentWave;
+    
 
     private readonly bool[,] foodMap;
     private readonly List<FoodWave> foodwaves = new List<FoodWave>();

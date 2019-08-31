@@ -19,6 +19,8 @@ public class GameController : MonoBehaviour
     public int flowerMaxSeconds;
     public int flowerWiltThresholdInSeconds;
     public int flowerSecondsGainedPerFood;
+    public int enemySpawnStartWait;
+    public int enemySpawnWait;
 
     public GameObject rockObstacle;
     public GameObject logObstacle;
@@ -59,6 +61,8 @@ public class GameController : MonoBehaviour
 
     public int EnemyPoolLimit = 20;
 
+    private EnemySpawner enemySpawner;
+
 
     public GameObject EnemyPrefab;
 
@@ -95,14 +99,18 @@ public class GameController : MonoBehaviour
         background.CrossFadeAlpha(0f, 0f, true);
         GameOverContainer.SetActive(false);
 
+        enemySpawner = new EnemySpawner();
+
+        StartCoroutine(SpawnEnemies());
 
         for (int i = 0; i < EnemyPoolLimit; i++)
         {
+            // This line throws an exception
             var temp = Instantiate(EnemyPrefab, Vector3.zero, Quaternion.identity, EnemyContainer.transform);
+
             temp.SetActive(false);
             EnemyList.Add(temp);
         }
-
     }
 
     // Update is called once per frame
@@ -340,6 +348,32 @@ public class GameController : MonoBehaviour
             StartCoroutine(GameOver());
         Debug.Log("Game is over. No more food will be spawned.");
 
+    }
+
+    IEnumerator SpawnEnemies()
+    {
+        yield return new WaitForSeconds(enemySpawnStartWait);
+
+        while (!gameOver)
+        {
+            // For now, the current food wave will double as the enemy wave.
+            // If we were doing this for real, these two systems would not be related.
+            // But, in the scope of a 48 hour game jam, this will do.
+            if (enemySpawner.ShouldSpawnEnemy(foodMap.CurrentWave))
+            {
+                Vector2Int position = enemySpawner.GetNewEnemySpawnPosition();
+
+                Debug.Log($"Spawning enemy at {position.x}, {position.y}");
+
+                InstantiateGameObjectAtPosition(EnemyPrefab, position);
+
+                enemySpawner.OnEnemySpawned();
+            }
+
+            yield return new WaitForSeconds(enemySpawnWait);
+        }
+
+        Debug.Log("Game is over. No more enemies will be spawned.");
     }
 
     IEnumerator FlowerCountdownTimer()

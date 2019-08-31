@@ -5721,6 +5721,8 @@ MonoBehaviour:
   flowerMaxSeconds: 60
   flowerWiltThresholdInSeconds: 10
   flowerSecondsGainedPerFood: 5
+  enemySpawnStartWait: 5
+  enemySpawnWait: 5
   rockObstacle: {fileID: 3463666963134266150, guid: 2f9952fb41d58684091263de52737ee8,
     type: 3}
   logObstacle: {fileID: 613168181323480149, guid: 8755ca2b4c3a8ee45afefe1053a70784,
