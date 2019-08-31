@@ -20,7 +20,7 @@ public class FoodDropOff : MonoBehaviour
     private Sprite isWilting;
     Animator myAnimator;
 
-    //Adding start to find reference to game controller.
+    //Adding start to find reference to game Controller.
     void Start()
     {
         controller = GameObject.Find("Game Controller").GetComponent<GameController>();

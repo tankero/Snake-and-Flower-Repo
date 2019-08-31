@@ -21,7 +21,7 @@ public class PlayerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {//brute force for the snake facing animations
-         /*if (controller.playerIsMoving == false)
+         /*if (Controller.playerIsMoving == false)
         {
            if (Input.GetAxisRaw("Vertical") > 0)
             {
@@ -53,10 +53,5 @@ public class PlayerScript : MonoBehaviour
 
     }
 
-    void OnCollisionEnter2D(Collision2D collision)
-    {
 
-
-
-    }
 }

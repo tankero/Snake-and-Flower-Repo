@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.SceneManagement;
@@ -44,6 +45,8 @@ public class GameController : MonoBehaviour
 
     public int snakeScore;
 
+    public GameObject EnemyContainer;
+
     public Image background;
     public float backgroundFade = 5f;
     public GameObject GameOverContainer;
@@ -52,14 +55,16 @@ public class GameController : MonoBehaviour
 
     public object Health { get; internal set; }
 
+    public List<GameObject> EnemyList;
 
-    public enum Direction
+    public int EnemyPoolLimit = 20;
+
+
+    public GameObject EnemyPrefab;
+
+    private void Awake()
     {
-        Up,
-        Down,
-        Left,
-        Right,
-        None
+
     }
 
     private void Start()
@@ -68,7 +73,7 @@ public class GameController : MonoBehaviour
         MenuButton.onClick.AddListener(() => Manager?.OnMenu());
         PlayerDestination = PlayerTransform.position;
         flowerHealthSlider = GameObject.Find("Flower Health Slider").GetComponent<Slider>();
-
+        
         foodMap = new FoodMap(levelGrid, waveCount, firstValidWave);
         // This needs to be called after the foodMap is created.
         SpawnObstacles();
@@ -88,15 +93,22 @@ public class GameController : MonoBehaviour
         fixedColor.a = 1;
         background.color = fixedColor;
         background.CrossFadeAlpha(0f, 0f, true);
+        GameOverContainer.SetActive(false);
 
 
+        for (int i = 0; i < EnemyPoolLimit; i++)
+        {
+            var temp = Instantiate(EnemyPrefab, Vector3.zero, Quaternion.identity, EnemyContainer.transform);
+            temp.SetActive(false);
+            EnemyList.Add(temp);
+        }
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     void FixedUpdate()
@@ -108,6 +120,37 @@ public class GameController : MonoBehaviour
         if (!playerIsMoving)
         {
             MovePlayer();
+        }
+
+        foreach (var enemy in EnemyList)
+        {
+            if (!enemy.activeInHierarchy)
+            {
+                continue;
+            }
+            var script = enemy.GetComponent<EnemyScript>();
+            script.Lifetime -= Time.fixedDeltaTime;
+            if (script.Lifetime <= 0)
+            {
+                Destroy(enemy);
+            }
+            if (!script.IsMoving && Time.time - script.LastMoveTime >= script.Cadence)
+            {
+                MoveEnemy(enemy);
+                script.LastMoveTime = Time.time;
+            }
+
+            if (Vector3.Distance(enemy.transform.position, script.Destination) <= 0.1f)
+            {
+                enemy.transform.position =
+                    levelGrid.GetCellCenterWorld(Vector3Int.FloorToInt(script.Destination));
+                script.IsMoving = false;
+            }
+            else
+            {
+                enemy.transform.position = Vector3.Lerp(enemy.transform.position, script.Destination, script.Speed * Time.fixedDeltaTime);
+                script.IsMoving = true;
+            }
         }
         flowerHealthSlider.value = flower.SecondsRemaining;
         if (Vector3.Distance(PlayerTransform.position, PlayerDestination) <= 0.1f)
@@ -121,6 +164,9 @@ public class GameController : MonoBehaviour
             PlayerTransform.position = Vector3.Lerp(PlayerTransform.position, PlayerDestination,
                 PlayerSpeed * Time.fixedDeltaTime);
         }
+        
+
+
     }
 
     private bool TestForObstacles(Vector3 startLocation, Vector3 endLocation)
@@ -128,7 +174,7 @@ public class GameController : MonoBehaviour
         LayerMask mask = LayerMask.GetMask("Obstacle");
         Debug.Log($"Testing direction:{endLocation - startLocation}");
 
-        Debug.DrawLine(startLocation, endLocation - startLocation, Color.red);
+        
         var hit = Physics2D.Raycast(startLocation, endLocation - startLocation, CellSize, mask);
 
         if (hit.collider != null)
@@ -139,16 +185,52 @@ public class GameController : MonoBehaviour
 
         return false;
     }
+
+    public void MoveEnemy(GameObject enemy)
+    {
+        var script = enemy.GetComponent<EnemyScript>();
+        var movementInput = script.MovementPattern;
+
+        if (levelGrid.HasTile(Vector3Int.CeilToInt(enemy.transform.position + movementInput)))
+        {
+            script.Destination = levelGrid.WorldToCell(enemy.transform.position + movementInput);
+        }
+        else
+        {
+            if (levelGrid.HasTile(Vector3Int.CeilToInt(enemy.transform.position) +
+                                  new Vector3Int(Mathf.CeilToInt(movementInput.x), 0, 0)))
+            {
+                enemy.transform.position = new Vector3(enemy.transform.position.x + CellSize,
+                    enemy.transform.position.y * -1, 0f);
+                script.Destination = enemy.transform.position;
+                return;
+            }
+            if (levelGrid.HasTile(Vector3Int.CeilToInt(enemy.transform.position) +
+                                  new Vector3Int(0, Mathf.CeilToInt(movementInput.y), 0)))
+            {
+                enemy.transform.position = new Vector3(enemy.transform.position.x *-1,
+                    enemy.transform.position.y + CellSize, 0f);
+                script.Destination = enemy.transform.position;
+            }
+        }
+
+        
+
+    }
+
+
+
     public void MovePlayer()
     {
+        var axis = new Vector3(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"), 0f) * CellSize;
         var axisY = new Vector3(0f, Input.GetAxisRaw("Vertical"), 0f) * CellSize;
         var axisX = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, 0f) * CellSize;
         if (Math.Abs(Input.GetAxisRaw("Vertical")) > 0.0001)
         {
-            
+
             if (levelGrid.HasTile(Vector3Int.CeilToInt(PlayerTransform.position + axisY)))
             {
-                
+
                 if (TestForObstacles(PlayerTransform.position, levelGrid.GetCellCenterWorld(
                     levelGrid.WorldToCell(PlayerTransform.position + axisY))))
                 {
@@ -168,7 +250,7 @@ public class GameController : MonoBehaviour
         }
         if (Math.Abs(Input.GetAxisRaw("Horizontal")) > 0.0001)
         {
-            
+
             if (levelGrid.HasTile(Vector3Int.CeilToInt(PlayerTransform.position + axisX)))
             {
 
@@ -224,7 +306,7 @@ public class GameController : MonoBehaviour
 
             if (gameOver)
             {
-                Debug.Log("Game is over. Wave controller shutting down.");
+                Debug.Log("Game is over. Wave Controller shutting down.");
                 break;
             }
 
@@ -357,4 +439,9 @@ public class GameController : MonoBehaviour
     }
 
     private bool RandomBool() => (UnityEngine.Random.Range(0, 2) == 1);
+
+    public void StunSnake()
+    {
+        Debug.Log("Snake has been stunned!");
+    }
 }
