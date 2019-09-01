@@ -5747,6 +5747,9 @@ MonoBehaviour:
   EnemyPoolLimit: 20
   EnemyPrefab: {fileID: 1021393485587099968, guid: c3bed520332fae844b0e5b3246df7276,
     type: 3}
+  EnemyMovementCadenceSetting: 1
+  EnemyLifetimeSetting: 25
+  SnakeStunTime: 3
 --- !u!1 &2110593759
 GameObject:
   m_ObjectHideFlags: 0

@@ -64,9 +64,13 @@ public class GameController : MonoBehaviour
     public int EnemyPoolLimit = 5;
 
     private EnemySpawner enemySpawner;
-
-
+    
     public GameObject EnemyPrefab;
+    public float EnemyMovementCadenceSetting = 1f;
+    public float EnemyLifetimeSetting = 25f;
+
+    private bool snakeStunned = false;
+    public float SnakeStunTime = 3;
 
     private void Awake()
     {
@@ -127,7 +131,7 @@ public class GameController : MonoBehaviour
         {
             return;
         }
-        if (!playerIsMoving)
+        if (!playerIsMoving && !snakeStunned)
         {
             MovePlayer();
         }
@@ -378,7 +382,8 @@ public class GameController : MonoBehaviour
                     EnemyList.Add(enemy);
                 }
 
-                enemy.GetComponent<EnemyScript>().Initialize(position, direction,1.75f, 15f);
+                
+                enemy.GetComponent<EnemyScript>().Initialize(position, direction, EnemyMovementCadenceSetting, EnemyLifetimeSetting);
                 enemySpawner.OnEnemySpawned();
             }
 
@@ -400,6 +405,15 @@ public class GameController : MonoBehaviour
                 gameOver = true;
             }
         }
+    }
+
+    IEnumerator StunSnakeTimer()
+    {
+        snakeStunned = true;
+        PlayerTransform.GetComponent<SpriteRenderer>().color = Color.red;
+        yield return new WaitForSeconds(SnakeStunTime);
+        PlayerTransform.GetComponent<SpriteRenderer>().color = Color.white;
+        snakeStunned = false;
     }
 
     public void OnSnakeCollisionWithFood(Vector2Int position)
@@ -488,6 +502,8 @@ public class GameController : MonoBehaviour
 
     public void StunSnake()
     {
-        Debug.Log("Snake has been stunned!");
+        
+        snakeScore = 0;
+        StartCoroutine(StunSnakeTimer());
     }
 }

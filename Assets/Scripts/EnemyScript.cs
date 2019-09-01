@@ -56,8 +56,5 @@ public class EnemyScript : MonoBehaviour
         }
     }
 
-    void OnDestroy()
-    {
-        Controller.EnemyList.Remove(gameObject);
-    }
+
 }
