@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
+using Random = System.Random;
 
 public class GameController : MonoBehaviour
 {
@@ -59,7 +61,7 @@ public class GameController : MonoBehaviour
 
     public List<GameObject> EnemyList;
 
-    public int EnemyPoolLimit = 20;
+    public int EnemyPoolLimit = 5;
 
     private EnemySpawner enemySpawner;
 
@@ -77,7 +79,7 @@ public class GameController : MonoBehaviour
         MenuButton.onClick.AddListener(() => Manager?.OnMenu());
         PlayerDestination = PlayerTransform.position;
         flowerHealthSlider = GameObject.Find("Flower Health Slider").GetComponent<Slider>();
-        
+
         foodMap = new FoodMap(levelGrid, waveCount, firstValidWave);
         // This needs to be called after the foodMap is created.
         SpawnObstacles();
@@ -140,7 +142,9 @@ public class GameController : MonoBehaviour
             script.Lifetime -= Time.fixedDeltaTime;
             if (script.Lifetime <= 0)
             {
-                Destroy(enemy);
+                enemySpawner.OnEnemyDespawned();
+                enemy.SetActive(false);
+                
             }
             if (!script.IsMoving && Time.time - script.LastMoveTime >= script.Cadence)
             {
@@ -172,7 +176,7 @@ public class GameController : MonoBehaviour
             PlayerTransform.position = Vector3.Lerp(PlayerTransform.position, PlayerDestination,
                 PlayerSpeed * Time.fixedDeltaTime);
         }
-        
+
 
 
     }
@@ -182,7 +186,7 @@ public class GameController : MonoBehaviour
         LayerMask mask = LayerMask.GetMask("Obstacle");
         Debug.Log($"Testing direction:{endLocation - startLocation}");
 
-        
+
         var hit = Physics2D.Raycast(startLocation, endLocation - startLocation, CellSize, mask);
 
         if (hit.collider != null)
@@ -216,13 +220,13 @@ public class GameController : MonoBehaviour
             if (levelGrid.HasTile(Vector3Int.CeilToInt(enemy.transform.position) +
                                   new Vector3Int(0, Mathf.CeilToInt(movementInput.y), 0)))
             {
-                enemy.transform.position = new Vector3(enemy.transform.position.x *-1,
+                enemy.transform.position = new Vector3(enemy.transform.position.x * -1,
                     enemy.transform.position.y + CellSize, 0f);
                 script.Destination = enemy.transform.position;
             }
         }
 
-        
+
 
     }
 
@@ -361,12 +365,20 @@ public class GameController : MonoBehaviour
             // But, in the scope of a 48 hour game jam, this will do.
             if (enemySpawner.ShouldSpawnEnemy(foodMap.CurrentWave))
             {
-                Vector2Int position = enemySpawner.GetNewEnemySpawnPosition();
+                Vector3 position = enemySpawner.GetNewEnemySpawnPosition();
+
+                Vector3 direction = enemySpawner.GetNewEnemyDirection();
 
                 Debug.Log($"Spawning enemy at {position.x}, {position.y}");
 
-                InstantiateGameObjectAtPosition(EnemyPrefab, position);
+                var enemy = EnemyList.FirstOrDefault(e => !e.activeInHierarchy);
+                if (enemy == null)
+                {
+                    enemy = Instantiate(EnemyPrefab, Vector3.zero, Quaternion.identity, EnemyContainer.transform);
+                    EnemyList.Add(enemy);
+                }
 
+                enemy.GetComponent<EnemyScript>().Initialize(position, direction,1.75f, 15f);
                 enemySpawner.OnEnemySpawned();
             }
 

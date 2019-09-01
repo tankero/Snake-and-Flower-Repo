@@ -36,7 +36,7 @@ public class EnemyScript : MonoBehaviour
     /* These enemies are meant to traverse the map for as long as they're active. The pre-instantiated pool of enemies is set in the GameController.
      The movement pattern should only have 1/0/-1 as values on either axis. Diagonal movement is also valid (1,1 / -1,-1 / etc..)
      */
-    void Initialize(Vector3 startingPosition, Vector2 movementPattern, float movementCadence, float lifetime)
+    public void Initialize(Vector3 startingPosition, Vector2 movementPattern, float movementCadence, float lifetime)
     {
         LastMoveTime = Time.time;
         Cadence = movementCadence;

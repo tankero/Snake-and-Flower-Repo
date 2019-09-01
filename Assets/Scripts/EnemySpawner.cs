@@ -19,9 +19,9 @@ public class EnemySpawner
         return (currentEnemiesSpawned < CurrentWave);
     }
 
-    public Vector2Int GetNewEnemySpawnPosition()
+    public Vector3 GetNewEnemySpawnPosition()
     {
-        Vector2Int returnValue = GetRandomPosition();
+        Vector3 returnValue = GetRandomPosition();
 
         return returnValue;
     }
@@ -36,7 +36,7 @@ public class EnemySpawner
         currentEnemiesSpawned--;
     }
 
-    public Vector2Int GetRandomPosition()
+    public Vector3 GetRandomPosition()
     {
         int column;
         int row;
@@ -58,8 +58,25 @@ public class EnemySpawner
             row = Random.Range(minRow, maxRow + 1);
         }
 
-        return new Vector2Int(column, row);
+        return new Vector3(column, row, 0);
     }
 
     private bool RandomBool() => (Random.Range(0, 2) == 1);
+
+    public Vector3 GetNewEnemyDirection()
+    {
+
+        int x = RandomBool() ? 1 : 0;
+        int y = RandomBool() ? 1 : 0;
+        while (x + y == 0)
+        {
+            x = RandomBool() ? 1 : 0;
+            y = RandomBool() ? 1 : 0;
+        }
+        x *= RandomBool() ? 1 : -1;
+        y *= RandomBool() ? 1 : -1;
+
+        return new Vector3(x, y, 0);
+
+    }
 }
