@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.SceneManagement;
@@ -49,6 +50,8 @@ public class GameController : MonoBehaviour
 
     public int snakeScore;
 
+    public TMP_Text ScoreDisplay;
+
     public GameObject EnemyContainer;
 
     public Image background;
@@ -64,7 +67,9 @@ public class GameController : MonoBehaviour
     public int EnemyPoolLimit = 5;
 
     private EnemySpawner enemySpawner;
-    
+
+    public int playerScore;
+
     public GameObject EnemyPrefab;
     public float EnemyMovementCadenceSetting = 1f;
     public float EnemyLifetimeSetting = 25f;
@@ -81,6 +86,8 @@ public class GameController : MonoBehaviour
     {
         Manager = GameObject.Find("Level Manager")?.GetComponent<LevelManager>();
         MenuButton.onClick.AddListener(() => Manager?.OnMenu());
+        ScoreDisplay = GameObject.Find("Score Display").GetComponent<TMP_Text>();
+
         PlayerDestination = PlayerTransform.position;
         flowerHealthSlider = GameObject.Find("Flower Health Slider").GetComponent<Slider>();
 
@@ -95,6 +102,8 @@ public class GameController : MonoBehaviour
         flowerHealthSlider.maxValue = flower.MaxSecondsRemaining;
         flowerHealthSlider.minValue = 0f;
         flowerHealthSlider.wholeNumbers = true;
+
+        playerScore = 0;
 
         StartCoroutine(FoodWaveController());
         StartCoroutine(SpawnFood());
@@ -181,7 +190,7 @@ public class GameController : MonoBehaviour
                 PlayerSpeed * Time.fixedDeltaTime);
         }
 
-
+        ScoreDisplay.text = playerScore.ToString().PadLeft(6, '0');
 
     }
 
@@ -301,10 +310,12 @@ public class GameController : MonoBehaviour
         gameIsEnding = true;
         yield return new WaitForSeconds(backgroundFade);
         GameOverContainer.SetActive(true);
+        GameObject.Find("Final Score Display").GetComponent<TMP_Text>().text = playerScore.ToString().PadLeft(6, '0');
     }
 
     public void AddSecondsToFlower(int secondsToAdd)
     {
+        
         Debug.Log("Adding " + secondsToAdd + " seconds to flower");
         flower.IncrementFlowerSeconds(secondsToAdd);
         Debug.Log("Flower total is now " + flower.SecondsRemaining);

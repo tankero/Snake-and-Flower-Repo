@@ -33,6 +33,7 @@ public class FoodDropOff : MonoBehaviour
     {
         flowerTotal += controller.snakeScore; //add to flower score
         controller.snakeScore = 0; //set snake food to 0
+        controller.playerScore = flowerTotal;
         Debug.Log("Total Flower points:" + flowerTotal);
         controller.AddSecondsToFlower(foodTimeValue);
         Debug.Log($"Food being dropped off by: {collision.gameObject}");

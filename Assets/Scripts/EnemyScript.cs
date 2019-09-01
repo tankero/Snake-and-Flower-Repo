@@ -22,7 +22,6 @@ public class EnemyScript : MonoBehaviour
     void Start()
     {
         Controller = GameObject.Find("Game Controller").GetComponent<GameController>();
-        Controller.EnemyList.Add(gameObject);
         Destination = transform.position;
         LastMoveTime = Time.time;
     }
