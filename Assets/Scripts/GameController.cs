@@ -72,7 +72,8 @@ public class GameController : MonoBehaviour
 
     public GameObject EnemyPrefab;
     public float EnemyMovementCadenceSetting = 1f;
-    public float EnemyLifetimeSetting = 25f;
+    public float horizontalEnemyLifetime;
+    public float verticalEnemyLifetime;
 
     private bool snakeStunned = false;
     public float SnakeStunTime = 3;
@@ -114,7 +115,10 @@ public class GameController : MonoBehaviour
         background.CrossFadeAlpha(0f, 0f, true);
         GameOverContainer.SetActive(false);
 
-        enemySpawner = new EnemySpawner();
+        enemySpawner = 
+            new EnemySpawner(
+                horizontalEnemyLifetime,
+                verticalEnemyLifetime);
 
         StartCoroutine(SpawnEnemies());
 
@@ -382,9 +386,11 @@ public class GameController : MonoBehaviour
             {
                 Vector3 position = enemySpawner.GetNewEnemySpawnPosition();
 
-                Vector3 direction = enemySpawner.GetNewEnemyDirection();
+                Debug.Log($"***Spawning enemy at {position.x}, {position.y}***");
 
-                Debug.Log($"Spawning enemy at {position.x}, {position.y}");
+                Vector3 direction = enemySpawner.GetNewEnemyDirection(position);
+
+                float lifetime = enemySpawner.GetNewEnemyLifetime(position);
 
                 var enemy = EnemyList.FirstOrDefault(e => !e.activeInHierarchy);
                 if (enemy == null)
@@ -392,9 +398,8 @@ public class GameController : MonoBehaviour
                     enemy = Instantiate(EnemyPrefab, Vector3.zero, Quaternion.identity, EnemyContainer.transform);
                     EnemyList.Add(enemy);
                 }
-
                 
-                enemy.GetComponent<EnemyScript>().Initialize(position, direction, EnemyMovementCadenceSetting, EnemyLifetimeSetting);
+                enemy.GetComponent<EnemyScript>().Initialize(position, direction, EnemyMovementCadenceSetting, lifetime);
                 enemySpawner.OnEnemySpawned();
             }
 
