@@ -222,21 +222,31 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            if (levelGrid.HasTile(Vector3Int.CeilToInt(enemy.transform.position) +
-                                  new Vector3Int(Mathf.CeilToInt(movementInput.x), 0, 0)))
+            if (levelGrid.HasTile(Vector3Int.FloorToInt(enemy.transform.position + movementInput)))
             {
-                enemy.transform.position = new Vector3(enemy.transform.position.x + CellSize,
+                script.Destination = levelGrid.WorldToCell(enemy.transform.position + movementInput);
+            }
+            if (levelGrid.HasTile(Vector3Int.CeilToInt(enemy.transform.position) +
+                                  new Vector3Int(Mathf.CeilToInt(enemy.transform.position.x + 1), 0, 0)))
+            {
+                enemy.transform.position = new Vector3(enemy.transform.position.x + movementInput.x,
                     enemy.transform.position.y * -1, 0f);
                 script.Destination = enemy.transform.position;
+                
                 return;
             }
             if (levelGrid.HasTile(Vector3Int.CeilToInt(enemy.transform.position) +
-                                  new Vector3Int(0, Mathf.CeilToInt(movementInput.y), 0)))
+                                  new Vector3Int(0, Mathf.CeilToInt(enemy.transform.position.y + 1), 0)))
             {
                 enemy.transform.position = new Vector3(enemy.transform.position.x * -1,
-                    enemy.transform.position.y + CellSize, 0f);
+                    enemy.transform.position.y + movementInput.y, 0f);
                 script.Destination = enemy.transform.position;
+                return;
             }
+            enemy.transform.position = new Vector3(Mathf.Clamp(enemy.transform.position.x + movementInput.x * -1, levelGrid.cellBounds.xMin, levelGrid.cellBounds.xMax),
+                Mathf.Clamp(
+                    enemy.transform.position.y + movementInput.y * -1, levelGrid.cellBounds.yMin, levelGrid.cellBounds.yMax), 0f);
+            script.Destination = enemy.transform.position;
         }
 
 
