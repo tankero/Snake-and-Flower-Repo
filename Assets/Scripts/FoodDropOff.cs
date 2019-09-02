@@ -31,6 +31,8 @@ public class FoodDropOff : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (controller.snakeScore > 0)//need to check if snake has food before running function
+        {
         flowerTotal += controller.snakeScore; //add to flower score
         controller.snakeScore = 0; //set snake food to 0
         controller.playerScore = flowerTotal;
@@ -38,6 +40,7 @@ public class FoodDropOff : MonoBehaviour
         controller.AddSecondsToFlower(foodTimeValue);
         Debug.Log($"Food being dropped off by: {collision.gameObject}");
         controller.OnSnakeCollisionWithFlower();
+        }
     }
 
     public void Update()
