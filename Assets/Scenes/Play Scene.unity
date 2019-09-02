@@ -449,7 +449,7 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 72
+  m_fontSize: 25.6
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -764,7 +764,7 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 36
+  m_fontSize: 18
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -782,7 +782,7 @@ MonoBehaviour:
   m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
-  m_firstOverflowCharacterIndex: -1
+  m_firstOverflowCharacterIndex: 0
   m_linkedTextComponent: {fileID: 0}
   m_isLinkedTextComponent: 0
   m_isTextTruncated: 0
@@ -1468,7 +1468,7 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 34
+  m_fontSize: 18
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1486,7 +1486,7 @@ MonoBehaviour:
   m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
-  m_firstOverflowCharacterIndex: -1
+  m_firstOverflowCharacterIndex: 0
   m_linkedTextComponent: {fileID: 0}
   m_isLinkedTextComponent: 0
   m_isTextTruncated: 0
@@ -2034,7 +2034,7 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 36
+  m_fontSize: 18
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2052,7 +2052,7 @@ MonoBehaviour:
   m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
-  m_firstOverflowCharacterIndex: -1
+  m_firstOverflowCharacterIndex: 0
   m_linkedTextComponent: {fileID: 0}
   m_isLinkedTextComponent: 0
   m_isTextTruncated: 0
@@ -2501,7 +2501,7 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 72
+  m_fontSize: 25.6
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2899,7 +2899,7 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 24
+  m_fontSize: 12
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2917,7 +2917,7 @@ MonoBehaviour:
   m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
-  m_firstOverflowCharacterIndex: -1
+  m_firstOverflowCharacterIndex: 98
   m_linkedTextComponent: {fileID: 0}
   m_isLinkedTextComponent: 0
   m_isTextTruncated: 0
@@ -6030,7 +6030,7 @@ MonoBehaviour:
   flowerWiltThresholdInSeconds: 10
   flowerSecondsGainedPerFood: 5
   enemySpawnStartWait: 5
-  enemySpawnWait: 5
+  enemySpawnWait: 1
   rockObstacle: {fileID: 3463666963134266150, guid: 2f9952fb41d58684091263de52737ee8,
     type: 3}
   logObstacle: {fileID: 613168181323480149, guid: 8755ca2b4c3a8ee45afefe1053a70784,
@@ -6053,12 +6053,13 @@ MonoBehaviour:
   GameOverContainer: {fileID: 646712103}
   gameIsEnding: 0
   EnemyList: []
-  EnemyPoolLimit: 5
+  EnemyPoolLimit: 10
   playerScore: 0
   EnemyPrefab: {fileID: 1021393485587099968, guid: c3bed520332fae844b0e5b3246df7276,
     type: 3}
-  EnemyMovementCadenceSetting: 1
-  EnemyLifetimeSetting: 25
+  EnemyMovementCadenceSetting: 0.2
+  horizontalEnemyLifetime: 8.5
+  verticalEnemyLifetime: 4.75
   SnakeStunTime: 3
 --- !u!1 &2110593759
 GameObject:
@@ -6206,6 +6207,12 @@ PrefabInstance:
       propertyPath: m_SortingOrder
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7498970872329406149, guid: 050ac09af3998f54fa43abea4cdbd5a8,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: eda8e5a92c4d77d4e81e604c6a15171a,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 050ac09af3998f54fa43abea4cdbd5a8, type: 3}
 --- !u!1001 &8109817201057472068
@@ -6280,5 +6287,23 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8109817200299287654, guid: bf874873afb751349b637a517623cbff,
+        type: 3}
+      propertyPath: wiltStage1
+      value: 
+      objectReference: {fileID: 21300000, guid: 6b09d06b35877b7419678e301051ea3b,
+        type: 3}
+    - target: {fileID: 8109817200299287654, guid: bf874873afb751349b637a517623cbff,
+        type: 3}
+      propertyPath: wiltStage2
+      value: 
+      objectReference: {fileID: 21300000, guid: 23bd82202864911408ad28545b0be3f0,
+        type: 3}
+    - target: {fileID: 8109817200299287654, guid: bf874873afb751349b637a517623cbff,
+        type: 3}
+      propertyPath: wiltStage3
+      value: 
+      objectReference: {fileID: 21300000, guid: 9ba13161eb4d64644892ab35e3e968be,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bf874873afb751349b637a517623cbff, type: 3}
