@@ -36,9 +36,9 @@ public class LevelManager : MonoBehaviour
 
     }
 
-    public void OnQuit()
+    public void OnCredits()
     {
-        Application.Quit();
+        SceneManager.LoadScene(2);
     }
 
     public void OnMenu()
