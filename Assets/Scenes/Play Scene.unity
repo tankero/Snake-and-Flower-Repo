@@ -6365,22 +6365,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   plantFood: {fileID: 7012926166109139369, guid: 9e7ae1135e38c9f498d503722d81b709,
     type: 3}
-  foodSpawnStartWait: 3
-  foodSpawnWait: 5
+  foodSpawnStartWait: 2
+  foodSpawnWait: 3
   waveCount: 9
-  waveDurationInSeconds: 30
+  waveDurationInSeconds: 18
   firstValidWave: 2
-  flowerInitialSeconds: 25
-  flowerMaxSeconds: 60
-  flowerWiltThresholdInSeconds: 10
-  flowerSecondsGainedPerFood: 5
-  enemySpawnStartWait: 5
+  flowerInitialSeconds: 20
+  flowerMaxSeconds: 40
+  flowerWiltThresholdInSeconds: 8
+  flowerSecondsGainedPerFood: 4
+  enemySpawnStartWait: 3
   enemySpawnWait: 1
   rockObstacle: {fileID: 3463666963134266150, guid: 2f9952fb41d58684091263de52737ee8,
     type: 3}
   logObstacle: {fileID: 613168181323480149, guid: 8755ca2b4c3a8ee45afefe1053a70784,
     type: 3}
-  obstaclesPerFoodWave: 4
+  obstaclesPerFoodWave: 3
   Manager: {fileID: 0}
   MenuButton: {fileID: 279486769}
   PlayerTransform: {fileID: 1099090135}
@@ -6398,13 +6398,13 @@ MonoBehaviour:
   GameOverContainer: {fileID: 646712103}
   gameIsEnding: 0
   EnemyList: []
-  EnemyPoolLimit: 10
+  EnemyPoolLimit: 15
   playerScore: 0
   EnemyPrefab: {fileID: 1021393485587099968, guid: c3bed520332fae844b0e5b3246df7276,
     type: 3}
-  EnemyMovementCadenceSetting: 0.2
-  horizontalEnemyLifetime: 8.5
-  verticalEnemyLifetime: 4.75
+  EnemyMovementCadenceSetting: 0
+  horizontalEnemyLifetime: 5.25
+  verticalEnemyLifetime: 3
   SnakeStunTime: 3
 --- !u!1 &2110593759
 GameObject:
@@ -6650,5 +6650,20 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 9ba13161eb4d64644892ab35e3e968be,
         type: 3}
+    - target: {fileID: 8109817200299287654, guid: bf874873afb751349b637a517623cbff,
+        type: 3}
+      propertyPath: foodTimeValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8109817200299287654, guid: bf874873afb751349b637a517623cbff,
+        type: 3}
+      propertyPath: growValue2
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 8109817200299287654, guid: bf874873afb751349b637a517623cbff,
+        type: 3}
+      propertyPath: growValue3
+      value: 2000
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bf874873afb751349b637a517623cbff, type: 3}
