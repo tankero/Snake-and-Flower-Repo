@@ -115,7 +115,7 @@ public class GameController : MonoBehaviour
         background.CrossFadeAlpha(0f, 0f, true);
         GameOverContainer.SetActive(false);
 
-        enemySpawner = 
+        enemySpawner =
             new EnemySpawner(
                 horizontalEnemyLifetime,
                 verticalEnemyLifetime);
@@ -161,7 +161,7 @@ public class GameController : MonoBehaviour
             {
                 enemySpawner.OnEnemyDespawned();
                 enemy.SetActive(false);
-                
+
             }
             if (!script.IsMoving && Time.time - script.LastMoveTime >= script.Cadence)
             {
@@ -272,8 +272,14 @@ public class GameController : MonoBehaviour
             }
             else if (EdgeJump)
             {
+                if (TestForObstacles(
+                    new Vector3(PlayerTransform.position.x, PlayerTransform.position.y * -1, 0f),
+                    new Vector3(PlayerTransform.position.x, PlayerTransform.position.y * -1, 0f)))
+                {
+                    return;
+                }
                 PlayerTransform.position = new Vector3(PlayerTransform.position.x, PlayerTransform.position.y * -1, 0f);
-                PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell((PlayerTransform.position + axisY)));
+                PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position));
 
             }
         }
@@ -295,8 +301,13 @@ public class GameController : MonoBehaviour
             }
             else if (EdgeJump)
             {
+                if (TestForObstacles(new Vector3(PlayerTransform.position.x * -1, PlayerTransform.position.y, 0f), 
+                    new Vector3(PlayerTransform.position.x * -1, PlayerTransform.position.y, 0f)))
+                {
+                    return;
+                }
                 PlayerTransform.position = new Vector3(PlayerTransform.position.x * -1, PlayerTransform.position.y, 0f);
-                PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell((PlayerTransform.position + axisX)));
+                PlayerDestination = levelGrid.GetCellCenterWorld(levelGrid.WorldToCell(PlayerTransform.position));
 
             }
         }
@@ -319,7 +330,7 @@ public class GameController : MonoBehaviour
 
     public void AddSecondsToFlower(int secondsToAdd)
     {
-        
+
         Debug.Log("Adding " + secondsToAdd + " seconds to flower");
         flower.IncrementFlowerSeconds(secondsToAdd);
         Debug.Log("Flower total is now " + flower.SecondsRemaining);
@@ -398,7 +409,7 @@ public class GameController : MonoBehaviour
                     enemy = Instantiate(EnemyPrefab, Vector3.zero, Quaternion.identity, EnemyContainer.transform);
                     EnemyList.Add(enemy);
                 }
-                
+
                 enemy.GetComponent<EnemyScript>().Initialize(position, direction, EnemyMovementCadenceSetting, lifetime);
                 enemySpawner.OnEnemySpawned();
             }
@@ -518,9 +529,20 @@ public class GameController : MonoBehaviour
 
     public void StunSnake()
     {
-        
+
         snakeScore = 0;
         snake.CurrentFoodCount = 0;
         StartCoroutine(StunSnakeTimer());
+        var containerTransform = GameObject.Find("Lives Container").transform;
+        for (int i = 3 - 1; i >= 0; i--)
+        {
+            if (containerTransform.transform.GetChild(i).gameObject.activeInHierarchy)
+            {
+                containerTransform.transform.GetChild(i).gameObject.SetActive(false);
+                return;
+            }
+        }
+
+        gameOver = true;
     }
 }
