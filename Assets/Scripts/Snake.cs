@@ -3,7 +3,8 @@
 public class Snake
 {
     public int CurrentFoodCount
-    { get; private set; }
+    { get;
+        set; }
 
     private static readonly object lockobj = new object();
 

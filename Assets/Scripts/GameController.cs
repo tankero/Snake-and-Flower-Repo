@@ -201,14 +201,14 @@ public class GameController : MonoBehaviour
     private bool TestForObstacles(Vector3 startLocation, Vector3 endLocation)
     {
         LayerMask mask = LayerMask.GetMask("Obstacle");
-        Debug.Log($"Testing direction:{endLocation - startLocation}");
+
 
 
         var hit = Physics2D.Raycast(startLocation, endLocation - startLocation, CellSize, mask);
 
         if (hit.collider != null)
         {
-            Debug.Log("Yep, that's an obstacle");
+
             return true;
         }
 
@@ -520,6 +520,7 @@ public class GameController : MonoBehaviour
     {
         
         snakeScore = 0;
+        snake.CurrentFoodCount = 0;
         StartCoroutine(StunSnakeTimer());
     }
 }

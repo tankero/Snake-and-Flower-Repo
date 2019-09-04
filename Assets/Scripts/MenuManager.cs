@@ -10,7 +10,7 @@ public class MenuManager : MonoBehaviour
 
     public Button PlayButton;
     public Button ScoreButton;
-    public Button QuitButton;
+    public Button CreditsButton;
 
 
     // Start is called before the first frame update
@@ -19,7 +19,7 @@ public class MenuManager : MonoBehaviour
         LevelManager Manager = GameObject.Find("Level Manager").GetComponent<LevelManager>();
         PlayButton.onClick.AddListener(() => Manager.OnPlay());
 
-        QuitButton.onClick.AddListener(() => Manager.OnQuit());
+        CreditsButton.onClick.AddListener(() => Manager.OnCredits());
 
     }
 
