@@ -550,4 +550,15 @@ public class GameController : MonoBehaviour
 
         gameOver = true;
     }
+    public void OnMute()
+    {
+        foreach (var soundSource in GameObject.FindGameObjectsWithTag("Sound"))
+        {
+            var sound = soundSource.GetComponent<AudioSource>();
+            if (sound != null)
+            {
+                sound.mute = !sound.mute;
+            }
+        }
+    }
 }
