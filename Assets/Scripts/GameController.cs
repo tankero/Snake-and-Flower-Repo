@@ -28,6 +28,8 @@ public class GameController : MonoBehaviour
     public GameObject rockObstacle;
     public GameObject logObstacle;
     public int obstaclesPerFoodWave;
+    AudioSource e_AudioSource;
+
 
     public LevelManager Manager;
     public Button MenuButton;
@@ -44,7 +46,7 @@ public class GameController : MonoBehaviour
     public Flower flower;
     private FoodMap foodMap;
     private Snake snake;
-    private bool gameOver = false;
+    public bool gameOver = false;
 
     private Slider flowerHealthSlider;
 
@@ -121,6 +123,8 @@ public class GameController : MonoBehaviour
                 verticalEnemyLifetime);
 
         StartCoroutine(SpawnEnemies());
+
+        e_AudioSource = GetComponent<AudioSource>();
 
         for (int i = 0; i < EnemyPoolLimit; i++)
         {
@@ -326,6 +330,7 @@ public class GameController : MonoBehaviour
         yield return new WaitForSeconds(backgroundFade);
         GameOverContainer.SetActive(true);
         GameObject.Find("Final Score Display").GetComponent<TMP_Text>().text = playerScore.ToString().PadLeft(6, '0');
+        e_AudioSource.Play();
     }
 
     public void AddSecondsToFlower(int secondsToAdd)
