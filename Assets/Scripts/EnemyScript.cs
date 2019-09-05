@@ -10,6 +10,7 @@ public class EnemyScript : MonoBehaviour
     public GameController Controller;
     public Vector3 Destination;
     public bool IsMoving = false;
+    [SerializeField] AudioClip hitSnakeSFX;
 
     [Range(0.5f, 5f)]
     public float Cadence = 1.75f;
@@ -52,6 +53,7 @@ public class EnemyScript : MonoBehaviour
         {
             Debug.Log("Stun the snake");
             Controller.StunSnake();
+            AudioSource.PlayClipAtPoint(hitSnakeSFX, Camera.main.transform.position);
         }
     }
 

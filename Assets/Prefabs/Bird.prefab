@@ -124,6 +124,7 @@ MonoBehaviour:
   Controller: {fileID: 0}
   Destination: {x: 0, y: 0, z: 0}
   IsMoving: 0
+  hitSnakeSFX: {fileID: 8300000, guid: 4689238b2ca5de641a8ceff759e8c4af, type: 3}
   Cadence: 1.75
   Lifetime: 10
   LastMoveTime: 0

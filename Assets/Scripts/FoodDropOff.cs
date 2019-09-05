@@ -19,6 +19,7 @@ public class FoodDropOff : MonoBehaviour
     private SpriteRenderer myRenderer;
     private Sprite isWilting;
     Animator myAnimator;
+    AudioSource m_AudioSource;
 
     //Adding start to find reference to game Controller.
     void Start()
@@ -27,6 +28,7 @@ public class FoodDropOff : MonoBehaviour
         myRenderer = gameObject.GetComponent<SpriteRenderer>();
         myAnimator = GetComponent<Animator>();
         isWilting = wiltStage1;
+        m_AudioSource = GetComponent<AudioSource>();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -40,12 +42,13 @@ public class FoodDropOff : MonoBehaviour
         controller.AddSecondsToFlower(foodTimeValue);
         Debug.Log($"Food being dropped off by: {collision.gameObject}");
         controller.OnSnakeCollisionWithFlower();
+        AudioSource.PlayClipAtPoint(foodDropSFX, Camera.main.transform.position);
         }
     }
 
+
     public void Update()
     {
-        
         if (flowerTotal >= growValue2)
         {
             myAnimator.enabled = true;
@@ -69,6 +72,10 @@ public class FoodDropOff : MonoBehaviour
         if (controller.flower.SecondsRemaining > controller.flower.WiltThreshold)
         {
             myAnimator.enabled = true;
+        }
+        if (controller.gameOver == true)
+        {
+            m_AudioSource.Stop();
         }
     }
 }

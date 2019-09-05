@@ -8,6 +8,7 @@ public class FoodPickup : MonoBehaviour
     [SerializeField] int pointsForfoodPickup = 100;
     private bool addedToScore;
     private GameController controller;
+    
 
     private void Start()
     {
@@ -29,7 +30,7 @@ public class FoodPickup : MonoBehaviour
             addedToScore = true;
             controller.AddToScore(pointsForfoodPickup);
             controller.OnSnakeCollisionWithFood(collisionPosition);
-            //AudioSource.PlayClipAtPoint(foodPickupSFX, Camera.main.transform.position);//future implementation of an audio effect
+            AudioSource.PlayClipAtPoint(foodPickupSFX, Camera.main.transform.position);//future implementation of an audio effect
             Destroy(gameObject);
         }
     }
